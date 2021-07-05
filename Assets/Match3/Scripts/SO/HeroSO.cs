@@ -8,4 +8,6 @@ public class HeroSO : ScriptableObject
     public int health;
     public int maxCharge = 100;
     public int chargeIncrease = 10;
+
+    public Sprite sprite;
 }
