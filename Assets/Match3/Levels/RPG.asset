@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd6cf24db8e89a64cb8d629f2c37fb98, type: 3}
+  m_Name: RPG
+  m_EditorClassIdentifier: 
+  gemList:
+  - {fileID: 11400000, guid: 782c28e2c82278e4fbec7eff1012fb88, type: 2}
+  - {fileID: 11400000, guid: 48f608c92c5d050468d379bcd56f6836, type: 2}
+  - {fileID: 11400000, guid: 3a140927d61acb6428169a771cabfdff, type: 2}
+  - {fileID: 11400000, guid: 8fb30dabdaf845c4e80e38d8836e34e3, type: 2}
+  - {fileID: 11400000, guid: 45e0be82ee937a9409ac5c6928093976, type: 2}
+  enemyList:
+  - {fileID: 11400000, guid: 0e23875dd53e6ed48ac38ac3751a5881, type: 2}
+  - {fileID: 0}
+  - {fileID: 11400000, guid: 0e23875dd53e6ed48ac38ac3751a5881, type: 2}
+  - {fileID: 0}
+  - {fileID: 11400000, guid: 0e23875dd53e6ed48ac38ac3751a5881, type: 2}
+  heroList:
+  - {fileID: 11400000, guid: e73ec94d972d04a48a17cf059ac8dcc1, type: 2}
+  - {fileID: 11400000, guid: 3145f5f03b4c2274d900aa0f7de10374, type: 2}
+  - {fileID: 11400000, guid: 6fbaea56d09258d49acf6ea396218d99, type: 2}
+  - {fileID: 11400000, guid: 93e141ed5fc204b48beef1ebeb486f3d, type: 2}
+  - {fileID: 11400000, guid: f72f39f25a8eaf64b81cb6ac77c8d917, type: 2}
+  width: 7
+  height: 5
