@@ -16,3 +16,4 @@ MonoBehaviour:
   health: 120
   maxCharge: 100
   chargeIncrease: 10
+  sprite: {fileID: 21300000, guid: 9608ba4a642da8347b6eeba0790d7c91, type: 3}

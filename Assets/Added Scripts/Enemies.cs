@@ -5,25 +5,32 @@ using UnityEngine;
 
 public class Enemies : MonoBehaviour
 {
-    private Match3 match3;
+    public static Enemies instance;
+    
     private Match3Visual visual;
     private List<EnemySO> enemyList;
     public const int MAX_ENEMY_AMOUNT = 5;
-    
     //Reference by position to enemies, remember to update on enemy death
     public Enemy[] ePosArr;
+    public List<Enemy> activeEnemies;
+
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else
+            DestroyImmediate(this);
+    }
+
+
     void Start()
     {
-        match3 = GameObject.FindWithTag("match3").GetComponent<Match3>();
-        match3.OnGemGridPositionFly += Match3_OnOnGemGridPositionFly;
-
-        visual = GameObject.FindWithTag("visual").GetComponent<Match3Visual>();
-        visual.OnStateChanged += Visual_OnOnStateChanged;
+        Match3.instance.OnGemGridPositionFly += Match3_OnOnGemGridPositionFly;
+        Match3Visual.instance.OnStateChanged += Visual_OnOnStateChanged;
         
-        ePosArr = new Enemy[match3.GetGridWidth()];
-
-        enemyList = match3.GetLevelSO().enemyList;
-        
+        ePosArr = new Enemy[Match3.instance.GetGridWidth()];
+        enemyList = Match3.instance.GetLevelSO().enemyList;
+        activeEnemies = new List<Enemy>();
         if (!SetUpArray())
             Debug.Log("Enemy set up failed at array stage");
     }
@@ -47,7 +54,7 @@ public class Enemies : MonoBehaviour
 
     private bool SetUpArray()
     {
-        int maxSize = match3.GetGridWidth();
+        int maxSize = Match3.instance.GetGridWidth();
         int tempSize = 0;
         int tempCount = 0;
 
@@ -59,11 +66,7 @@ public class Enemies : MonoBehaviour
                 tempCount++;
             }
         }
-        
-        Debug.Log(tempCount);
-        Debug.Log(tempSize);
-        Debug.Log(ePosArr.Length);
-        
+
         if (tempSize > maxSize || tempCount > MAX_ENEMY_AMOUNT)
             return false;
         
@@ -71,8 +74,8 @@ public class Enemies : MonoBehaviour
         {
             if (enemyList[i] != null )
             {
-                Enemy add = new Enemy {Health = enemyList[i].health, AttackType = enemyList[i].enemyType};
-
+                Enemy add = new Enemy (enemyList[i].health, enemyList[i].skill, enemyList[i].targets);
+                activeEnemies.Add(add);
                 if (enemyList[i].size > 0)
                 {
                     for (int j = 0; j < enemyList[i].size; j++)
@@ -83,8 +86,6 @@ public class Enemies : MonoBehaviour
                 else
                     return false;
             }
-            
-            Debug.Log(i);
         }
         
         return true;
@@ -94,63 +95,44 @@ public class Enemies : MonoBehaviour
     {
         if (ePosArr[pos] != null)
         {
-            return ePosArr[pos].takeDamage(dmg);
+            return ePosArr[pos].TakeDamage(dmg);
         }
         else
             return false;
     }
     
-    public class Enemy
+    public class Enemy : Entity
     {
-            private int health;
-            //Action on attack
-            private EnemySO.Type attackType;
+        public Enemy(int maxHealth, Skill skill, EntitySO.TargetTypes targetType) : base(maxHealth, skill, targetType) {}
 
-            private bool isDead = false;
-            private int poisonCounter;
-
-        public bool IsDead()
+        public void Attack()
         {
-            return isDead;
+            skill.UseEffect(this, targetType);
         }
 
-        public void getPoisoned(int rounds)
+        public override void Die()
         {
-            poisonCounter = rounds;
-        }
-
-        public bool takeDamage(int val)
-        {
-            if (val < health)
+            for (int i = 0; i < instance.ePosArr.Length; i++)
             {
-                health -= val;
-                return true;
+                if (this == instance.ePosArr[i])
+                {
+                    instance.ePosArr[i] = null;
+                }
             }
-            else
-            {
-                isDead = true;
-                return false;
-            }
-        }
 
-        public int Health
-        {
-            get => health;
-            set => health = value;
+            instance.activeEnemies.Remove(this);
         }
-
-        public EnemySO.Type AttackType
-        {
-            get => attackType;
-            set => attackType = value;
-        }
-
+        
+        
         public override string ToString()
         {
-            return "Type: " + attackType + "\n"
-                    +"Health: " + health + "\n"
-                    +"isDead: " + isDead + "\n";
+            return "Type: " + skill + "\n"
+                    +"Health: " + Health + "\n"
+                    +"isDead: " + IsDead() + "\n";
         }
+
+
+
     }
     
 }

@@ -1,11 +1,11 @@
 using UnityEngine;
 
 [CreateAssetMenu()]
-public class HeroSO : ScriptableObject
+public class HeroSO : EntitySO
 {
-    // Start is called before the first frame update
+   
     public GemSO.GemColor associatedGem;
-    public int health;
+    [SerializeField, SerializeReference]
     public int maxCharge = 100;
     public int chargeIncrease = 10;
 

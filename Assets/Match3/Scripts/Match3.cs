@@ -6,8 +6,10 @@ using UnityEngine;
 /*
  * Represents the underlying Grid logic
  * */
-public class Match3 : MonoBehaviour {
-
+public class Match3 : MonoBehaviour
+{
+    public static Match3 instance; 
+    
     public event EventHandler OnGemGridPositionDestroyed;
     public event EventHandler<OnNewGemGridPositionFlyEventArgs> OnGemGridPositionFly;
     public event EventHandler<OnNewGemGridSpawnedEventArgs> OnNewGemGridSpawned;
@@ -41,6 +43,14 @@ public class Match3 : MonoBehaviour {
     private Grid<GemGridPosition> grid;
     private int score;
 
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else
+            DestroyImmediate(this);
+    }
+    
     private void Start() {
         if (autoLoadLevel) {
             SetLevelSO(levelSO);

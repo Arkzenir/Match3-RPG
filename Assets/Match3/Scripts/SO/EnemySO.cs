@@ -2,17 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [CreateAssetMenu()]
-public class EnemySO : ScriptableObject
+public class EnemySO : EntitySO
 {
-    public enum Type
-    {
-        AreaAttack,
-        SingleAttack,
-        Healer,
-    }
-
-    public Type enemyType;
-    public int health;
+    [SerializeField, SerializeReference]
     public int size;
     public Sprite sprite;
 

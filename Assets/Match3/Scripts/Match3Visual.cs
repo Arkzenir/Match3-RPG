@@ -10,6 +10,7 @@ using UnityEditorInternal;
  * */
 public class Match3Visual : MonoBehaviour {
 
+    public static Match3Visual instance; 
     public event EventHandler OnStateChanged;
     public class OnStateChangedEventArgs : EventArgs
     {
@@ -19,6 +20,7 @@ public class Match3Visual : MonoBehaviour {
         Busy,
         WaitingForUser,
         TryFindMatches,
+        EnemyTurn, //Go to this state only from the end of user input OR at the end of a series of matches after user input
         GameOver,
     }
 
@@ -41,9 +43,16 @@ public class Match3Visual : MonoBehaviour {
     private Vector3 MouseWorldPosition;
 
     private void Awake() {
-        state = State.Busy;
-        isSetup = false;
-        match3.OnLevelSet += Match3_OnLevelSet;
+
+        if (instance == null)
+        {
+            instance = this;
+            state = State.Busy;
+            isSetup = false;
+            match3.OnLevelSet += Match3_OnLevelSet;
+        }
+        else
+            DestroyImmediate(this);
     }
 
     private void Match3_OnLevelSet(object sender, Match3.OnLevelSetEventArgs e) {

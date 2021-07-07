@@ -7,23 +7,32 @@ using UnityEngine;
 
 public class Heroes : MonoBehaviour
 {
-    private Match3 match3;
+    public static Heroes instance;
+    
     private Match3Visual visual;
     private Enemies enemies;
     private List<HeroSO> heroList;
-    public Hero[] heroes;
+    public List<Hero> heroes;
     public const int HERO_COUNT = 5;
+
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else
+            DestroyImmediate(this);
+    }
+
     void Start()
     {
-        match3 = GameObject.FindWithTag("match3").GetComponent<Match3>();
-        match3.OnGemGridPositionFly += Match3_OnOnGemGridPositionFly;
+        Match3.instance.OnGemGridPositionFly += Match3_OnOnGemGridPositionFly;
         enemies = GameObject.FindWithTag("enemies").GetComponent<Enemies>();
         visual = GameObject.FindWithTag("visual").GetComponent<Match3Visual>();
         visual.OnStateChanged += Visual_OnOnStateChanged;
         
-        heroes = new Hero[HERO_COUNT];
+        heroes = new List<Hero>(HERO_COUNT);
 
-        heroList = match3.GetLevelSO().heroList;
+        heroList = Match3.instance.GetLevelSO().heroList;
         if (!SetUpArray())
             Debug.Log("Hero set up failed at array stage");
 
@@ -38,7 +47,7 @@ public class Heroes : MonoBehaviour
         {
             if (heroList[i] != null)
             {
-                Hero add = new Hero(heroList[i].health, heroList[i].associatedGem, heroList[i].maxCharge, heroList[i].chargeIncrease);
+                Hero add = new Hero(heroList[i].health, heroList[i].associatedGem, heroList[i].skill, heroList[i].targets, heroList[i].maxCharge, heroList[i].chargeIncrease);
                 heroes[i] = add;
             }
             else
@@ -60,52 +69,47 @@ public class Heroes : MonoBehaviour
 
         foreach (var hero in heroes)
         {
-            if (hero != null && hero.getAssociatedGem() == gemType.color)
+            if (hero != null && hero.GetAssociatedGem() == gemType.color)
             {
-                hero.chargeSkill(1);
+                hero.ChargeSkill(1);
             }
         }
     }
 
-    public class Hero
+    public class Hero : Entity
     {
-        private int health;
         private GemSO.GemColor associatedGem;
         private int charge;
         private int maxCharge;
         private int chargeIncrease;
-        private bool isDead;
         private bool ready;
-
-
-        public Hero(int health, GemSO.GemColor associatedGem, int maxCharge, int chargeIncrease)
+        
+        public Hero(int maxHealth, GemSO.GemColor associatedGem, Skill skill, EntitySO.TargetTypes targetType, int maxCharge, int chargeIncrease) : base(maxHealth, skill, targetType)
         {
-            this.health = health;
             this.associatedGem = associatedGem;
             this.maxCharge = maxCharge;
             this.chargeIncrease = chargeIncrease;
-            isDead = false;
             ready = false;
         }
-
-        public bool isReady()
+        
+        public bool IsReady()
         {
             return ready;
         }
 
-        public bool useAbility()
+        public bool UseAbility()
         {
             if (!ready)
                 return false;
 
             charge = 0;
             ready = false;
-            //TODO: Add function/event call to ability by gem color
-            
+            skill.UseEffect(this, targetType);
             return true;
         }
+        
 
-        public void chargeSkill(int times)
+        public void ChargeSkill(int times)
         {
             charge = charge + chargeIncrease * times;
 
@@ -113,30 +117,31 @@ public class Heroes : MonoBehaviour
                 ready = true;
         }
         
-        public int Health
-        {
-            get => health;
-            set => health = value;
-        }
-        
-        public GemSO.GemColor getAssociatedGem()
+        public GemSO.GemColor GetAssociatedGem()
         {
             return associatedGem;
         }
 
-        public bool IsDead
+        public override void Die()
         {
-            get => isDead;
-            set => isDead = value;
+            for (int i = 0; i < instance.heroes.Count; i++)
+            {
+                if (instance.heroes[i] == this)
+                {
+                    instance.heroes[i] = null;
+                    break;
+                }
+            }
         }
 
         public override string ToString()
         {
             return "Type: " + associatedGem + "\n"
-                   +"Health: " + health + "\n"
+                   +"Health: " + Health + "\n"
                    +"Charge " + charge + "\n"
-                   +"isDead: " + isDead + "\n";
+                   +"isDead: " + IsDead() + "\n";
         }
+
         
     }
 }
