@@ -12,8 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a26a97b3c8f4ce498a22aaf06c61385, type: 3}
   m_Name: Blue
   m_EditorClassIdentifier: 
-  associatedGem: 0
+  skill: {fileID: 1230146485441637322, guid: 94fb35bd82f8b044fa1fb5f7f36719b0, type: 3}
+  targets: 1
   health: 100
+  visualPrefab: {fileID: 3549057467594959623, guid: 0ed4e5aad5f7c6f428785fa38d398f78, type: 3}
+  sprite: {fileID: 21300000, guid: 42d3b1ec7cb5c5d48ab622f891929e25, type: 3}
+  associatedGem: 0
   maxCharge: 100
   chargeIncrease: 10
-  sprite: {fileID: 21300000, guid: 42d3b1ec7cb5c5d48ab622f891929e25, type: 3}

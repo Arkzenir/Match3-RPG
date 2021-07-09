@@ -13,5 +13,6 @@ public class EntitySO : ScriptableObject
     public Skill skill;
     public TargetTypes targets;
     public int health;
-
+    public GameObject visualPrefab;
+    public Sprite sprite;
 }

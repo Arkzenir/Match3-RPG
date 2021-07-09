@@ -7,15 +7,17 @@ public class SweepAttack : Skill
     public int damage = 10;
     public override void Effect(Entity target)
     {
-        target.Health -= damage;
+        target.TakeDamage(damage);
     }
 
     public override void UseEffect(Entity target, EntitySO.TargetTypes targetType)
     {
-        foreach (var h in Heroes.instance.heroes)
+        for (int i = 0; i < Heroes.instance.heroes.Length; i++)
         {
-            if (h != null)
-                Effect(h);
+            if (Heroes.instance.heroes[i] != null)
+            {
+                Effect(Heroes.instance.heroes[i]);
+            }
         }
     }
 }

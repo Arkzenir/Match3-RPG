@@ -7,6 +7,6 @@ public class SingleAttack : Skill
     public int damage = 20;
     public override void Effect(Entity target)
     {
-        target.Health -= damage;
+        target.TakeDamage(damage);
     }
 }

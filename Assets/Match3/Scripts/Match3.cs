@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /*
  * Represents the underlying Grid logic
@@ -16,7 +17,7 @@ public class Match3 : MonoBehaviour
     public event EventHandler<OnLevelSetEventArgs> OnLevelSet;
     public event EventHandler OnScoreChanged;
     public event EventHandler OnWin;
-
+    public event EventHandler OnLose;
     public class OnNewGemGridSpawnedEventArgs : EventArgs {
         public GemGrid gemGrid;
         public GemGridPosition gemGridPosition;
@@ -155,7 +156,7 @@ public class Match3 : MonoBehaviour
     {
         if (gemGridPosition.HasGemGrid())
         {
-            score += 100;
+            score += 10;
             gemGridPosition.FlyGem();
             OnGemGridPositionFly?.Invoke(gemGridPosition, 
                 new OnNewGemGridPositionFlyEventArgs{x = gemGridPosition.GetX(),y = 8, gemType = gemGridPosition.GetGemGrid().GetGem()});
@@ -370,7 +371,6 @@ public class Match3 : MonoBehaviour
         return allLinkedGemGridPositionList;
     }
     
-
     private GemSO GetGemSO(int x, int y) {
         if (!IsValidPosition(x, y)) return null;
 
@@ -391,37 +391,40 @@ public class Match3 : MonoBehaviour
         }
     }
 
-    public bool TryIsGameOver() {
-
-//TODO: Add checks for player and enemy game over cases
-        /*
-        switch (levelSO.goalType) {
-            default:
-            case LevelSO.GoalType.Score:
-                if (score >= levelSO.targetScore) {
-                    // Reached Target Score!
-                    OnWin?.Invoke(this, EventArgs.Empty);
-                    return true;
-                }
-                break;
-            case LevelSO.GoalType.Glass:
-                if (GetGlassAmount() <= 0) {
-                    // All glass destroyed!
-                    OnWin?.Invoke(this, EventArgs.Empty);
-                    return true;
-                }
-                break;
-            case LevelSO.GoalType.Rpg:
-                break;
+    public bool TryIsGameOver()
+    {
+        bool result = true;
+        foreach (var h in Heroes.instance.heroes)
+        {
+            if (!h.IsDead())
+                result = false;
         }
-*/
-        // Not game over
-        return false;
+
+        if (result)
+            OnLose?.Invoke(this,EventArgs.Empty);
+
+        if (Enemies.instance.activeEnemies.Count > 0)
+        {
+            result = false;
+            return result;
+        }
+        OnWin?.Invoke(this, EventArgs.Empty);
+        return result;
+    }
+
+    public void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public int GetGridWidth()
     {
         return levelSO.width;
+    }
+
+    public int GetGridHeight()
+    {
+        return levelSO.height;
     }
 
     /*

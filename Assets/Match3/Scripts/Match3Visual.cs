@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using CodeMonkey.Utils;
 using UnityEditorInternal;
+using Random = System.Random;
 
 /*
  * Visual Representation of the underlying Match3 Grid
  * */
 public class Match3Visual : MonoBehaviour {
 
-    public static Match3Visual instance; 
-    public event EventHandler OnStateChanged;
+    public static Match3Visual instance;
+    public event EventHandler<OnStateChangedEventArgs> OnStateChanged;
     public class OnStateChangedEventArgs : EventArgs
     {
         public State state;
@@ -20,7 +21,7 @@ public class Match3Visual : MonoBehaviour {
         Busy,
         WaitingForUser,
         TryFindMatches,
-        EnemyTurn, //Go to this state only from the end of user input OR at the end of a series of matches after user input
+        EnemyTurn,
         GameOver,
     }
 
@@ -38,6 +39,8 @@ public class Match3Visual : MonoBehaviour {
     private float busyTimer;
     private Action onBusyTimerElapsedAction;
 
+    private int numOfMatched = 0;
+    
     private int touchX;
     private int touchY;
     private Vector3 MouseWorldPosition;
@@ -65,7 +68,7 @@ public class Match3Visual : MonoBehaviour {
         this.match3 = match3;
         this.grid = grid;
 
-        enemies = GameObject.FindWithTag("enemies").GetComponent<Enemies>();
+        enemies = Enemies.instance;
         
         float cameraYOffset = 1f;
         cameraTransform.position = new Vector3(grid.GetWidth() * .5f, grid.GetHeight() * .5f + cameraYOffset, cameraTransform.position.z);
@@ -150,14 +153,17 @@ public class Match3Visual : MonoBehaviour {
                 }
 
                 break;
+            case State.EnemyTurn:
+                TrySetStateWaitingForUser();
+                break;
             case State.WaitingForUser:
                 if (Input.GetMouseButtonDown(0))
                 {
                     Vector3 mouseWorldPosition = UtilsClass.GetMouseWorldPosition();
                     grid.GetXY(mouseWorldPosition, out touchX, out touchY);
-                    RemoveGridPosition(touchX, touchY);
+                    if (touchY >= 0)
+                        RemoveGridPosition(touchX, touchY);
                 }
-
                 break;
             case State.TryFindMatches:
 //TODO: The fall method only fires twice here
@@ -173,6 +179,7 @@ public class Match3Visual : MonoBehaviour {
                 
                 if (match3.TryFindMatchesAndDestroyThem())
                 {
+                    numOfMatched++;
                     SetBusyState(.4f, () =>
                     {
                         match3.SpawnNewMissingGridPositions();
@@ -217,8 +224,16 @@ public class Match3Visual : MonoBehaviour {
             Debug.Log("Game Over!");
             SetState(State.GameOver);
         } else {
-            // Keep Playing
-            SetState(State.WaitingForUser);
+            
+            if (state == State.TryFindMatches && numOfMatched > 0)
+            {
+                SetState(State.EnemyTurn);
+            }else if (state == State.EnemyTurn)
+            {
+                SetState(State.TryFindMatches);
+            }else
+                SetState(State.WaitingForUser);
+            numOfMatched = 0;
         }
     }
 

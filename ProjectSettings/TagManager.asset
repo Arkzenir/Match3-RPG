@@ -4,10 +4,7 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - match3
-  - heroes
-  - enemies
-  - visual
+  - Healthbar_Bar
   layers:
   - Default
   - TransparentFX

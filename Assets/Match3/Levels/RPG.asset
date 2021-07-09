@@ -21,7 +21,9 @@ MonoBehaviour:
   enemyList:
   - {fileID: 11400000, guid: 0e23875dd53e6ed48ac38ac3751a5881, type: 2}
   - {fileID: 0}
-  - {fileID: 11400000, guid: 0e23875dd53e6ed48ac38ac3751a5881, type: 2}
+  - {fileID: 11400000, guid: bd5f2a24de9dfa84197313362858ae11, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 11400000, guid: 0e23875dd53e6ed48ac38ac3751a5881, type: 2}
   heroList:

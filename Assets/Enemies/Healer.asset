@@ -10,9 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fdd354578b80fe644a42cf135e7093af, type: 3}
-  m_Name: Guard
+  m_Name: Healer
   m_EditorClassIdentifier: 
-  enemyType: 1
-  health: 40
-  size: 1
-  sprite: {fileID: 21300000, guid: 6a1514fa84f407b43b6d84ce4d48c489, type: 3}
+  skill: {fileID: 2892803900799513510, guid: 5ec3c25da414e6b469130d8226d8c876, type: 3}
+  targets: 0
+  health: 100
+  visualPrefab: {fileID: 5553827372484543316, guid: 1b4f5dbdc89784d4ab44e7baf49d8f36, type: 3}
+  sprite: {fileID: 21300000, guid: 62c31df052c2eac4ba2f0c7882c26bfd, type: 3}
+  size: 2

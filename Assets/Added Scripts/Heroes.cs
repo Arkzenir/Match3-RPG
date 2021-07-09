@@ -12,12 +12,12 @@ public class Heroes : MonoBehaviour
     private Match3Visual visual;
     private Enemies enemies;
     private List<HeroSO> heroList;
-    public List<Hero> heroes;
+    public Hero[] heroes;
     public const int HERO_COUNT = 5;
 
     private void Awake()
     {
-        if (instance == null)
+        if (instance == null || instance == this)
             instance = this;
         else
             DestroyImmediate(this);
@@ -25,17 +25,17 @@ public class Heroes : MonoBehaviour
 
     void Start()
     {
+        
         Match3.instance.OnGemGridPositionFly += Match3_OnOnGemGridPositionFly;
-        enemies = GameObject.FindWithTag("enemies").GetComponent<Enemies>();
-        visual = GameObject.FindWithTag("visual").GetComponent<Match3Visual>();
+        enemies = Enemies.instance;
+        visual = Match3Visual.instance;
         visual.OnStateChanged += Visual_OnOnStateChanged;
         
-        heroes = new List<Hero>(HERO_COUNT);
+        heroes = new Hero[HERO_COUNT];
 
         heroList = Match3.instance.GetLevelSO().heroList;
         if (!SetUpArray())
             Debug.Log("Hero set up failed at array stage");
-
     }
 
     private bool SetUpArray()
@@ -47,19 +47,26 @@ public class Heroes : MonoBehaviour
         {
             if (heroList[i] != null)
             {
-                Hero add = new Hero(heroList[i].health, heroList[i].associatedGem, heroList[i].skill, heroList[i].targets, heroList[i].maxCharge, heroList[i].chargeIncrease);
+                Hero add = new Hero(
+                    heroList[i].health, heroList[i].associatedGem, heroList[i].skill, heroList[i].targets, heroList[i].maxCharge, heroList[i].chargeIncrease,
+                    heroList[i].visualPrefab, heroList[i].sprite, (float)Match3.instance.GetGridWidth() / HERO_COUNT);
                 heroes[i] = add;
             }
             else
                 heroes[i] = null;
         }
-
         return true;
     }
     
-    private void Visual_OnOnStateChanged(object sender, EventArgs e)
+    private void Visual_OnOnStateChanged(object sender, Match3Visual.OnStateChangedEventArgs e)
     {
-        //For when state = WaitingForUser
+        if (e.state == Match3Visual.State.WaitingForUser)
+        {
+            foreach (var hero in heroes)
+            {
+                hero.UpdateStatus();
+            }
+        }
     }
 
     private void Match3_OnOnGemGridPositionFly(object sender, Match3.OnNewGemGridPositionFlyEventArgs e)
@@ -84,7 +91,8 @@ public class Heroes : MonoBehaviour
         private int chargeIncrease;
         private bool ready;
         
-        public Hero(int maxHealth, GemSO.GemColor associatedGem, Skill skill, EntitySO.TargetTypes targetType, int maxCharge, int chargeIncrease) : base(maxHealth, skill, targetType)
+        public Hero(int maxHealth, GemSO.GemColor associatedGem, Skill skill, EntitySO.TargetTypes targetType, int maxCharge, int chargeIncrease, GameObject pf, Sprite sprite, float size)
+            : base(maxHealth, skill, targetType, pf, sprite, size)
         {
             this.associatedGem = associatedGem;
             this.maxCharge = maxCharge;
@@ -97,22 +105,37 @@ public class Heroes : MonoBehaviour
             return ready;
         }
 
-        public bool UseAbility()
+        public override void UseSkill()
         {
-            if (!ready)
-                return false;
-
-            charge = 0;
-            ready = false;
-            skill.UseEffect(this, targetType);
-            return true;
+            if (ready)
+            {
+                charge = 0;
+                ready = false;
+                float percentSkill = (float) charge / maxCharge;
+                skillBar.transform.localScale = new Vector3(percentSkill, 1);
+                base.UseSkill();
+            }
         }
-        
 
-        public void ChargeSkill(int times)
+        public override void SkillSetup(Transform sBar, TextMeshPro sText)
+        {
+            skillBar = sBar;
+            skillBarText = sText;
+            skillBarText.text = charge + " / " + maxCharge;
+            float percentSkill = (float) charge / maxCharge;
+            skillBar.transform.localScale = new Vector3(percentSkill, 1);
+        }
+
+        public override void ChargeSkill(int times)
         {
             charge = charge + chargeIncrease * times;
-
+            if (charge <= maxCharge)
+            {
+                skillBarText.text = charge + " / " + maxCharge;
+                float percentSkill = (float) charge / maxCharge;
+                skillBar.transform.localScale = new Vector3(percentSkill, 1);
+            }
+            
             if (charge >= maxCharge)
                 ready = true;
         }
@@ -124,7 +147,7 @@ public class Heroes : MonoBehaviour
 
         public override void Die()
         {
-            for (int i = 0; i < instance.heroes.Count; i++)
+            for (int i = 0; i < instance.heroes.Length; i++)
             {
                 if (instance.heroes[i] == this)
                 {

@@ -1,14 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Enemies : MonoBehaviour
 {
     public static Enemies instance;
-    
     private Match3Visual visual;
-    private List<EnemySO> enemyList;
+    private int eIndex = 0;
+    public List<EnemySO> enemyList;
     public const int MAX_ENEMY_AMOUNT = 5;
     //Reference by position to enemies, remember to update on enemy death
     public Enemy[] ePosArr;
@@ -16,7 +17,7 @@ public class Enemies : MonoBehaviour
 
     private void Awake()
     {
-        if (instance == null)
+        if (instance == null || instance == this)
             instance = this;
         else
             DestroyImmediate(this);
@@ -35,9 +36,25 @@ public class Enemies : MonoBehaviour
             Debug.Log("Enemy set up failed at array stage");
     }
 
-    private void Visual_OnOnStateChanged(object sender, EventArgs e)
+    private void Visual_OnOnStateChanged(object sender, Match3Visual.OnStateChangedEventArgs e)
     {
+        if (e.state == Match3Visual.State.WaitingForUser)
+        {
+            foreach (var enemy in activeEnemies)
+            {
+                enemy.UpdateStatus();
+            }
+        }
         
+        if (e.state == Match3Visual.State.EnemyTurn)
+        {
+            activeEnemies[eIndex].UseSkill();
+            eIndex++;
+            if (eIndex >= activeEnemies.Count)
+                eIndex = 0;
+            
+            Debug.Log("eIndex: " + eIndex);
+        }
     }
 
     private void Match3_OnOnGemGridPositionFly(object sender, Match3.OnNewGemGridPositionFlyEventArgs e)
@@ -70,11 +87,11 @@ public class Enemies : MonoBehaviour
         if (tempSize > maxSize || tempCount > MAX_ENEMY_AMOUNT)
             return false;
         
-        for (int i = 0; i < ePosArr.Length; i++)
+        for (int i = 0; i < enemyList.Count; i++)
         {
             if (enemyList[i] != null )
             {
-                Enemy add = new Enemy (enemyList[i].health, enemyList[i].skill, enemyList[i].targets);
+                Enemy add = new Enemy (enemyList[i].health, enemyList[i].skill, enemyList[i].targets, enemyList[i].visualPrefab, enemyList[i].sprite, enemyList[i].size);
                 activeEnemies.Add(add);
                 if (enemyList[i].size > 0)
                 {
@@ -87,29 +104,22 @@ public class Enemies : MonoBehaviour
                     return false;
             }
         }
-        
         return true;
     }
 
-    public bool enemyTakeDamage(int pos, int dmg)
+    public void enemyTakeDamage(int pos, int dmg)
     {
         if (ePosArr[pos] != null)
         {
-            return ePosArr[pos].TakeDamage(dmg);
+            ePosArr[pos].TakeDamage(dmg);
         }
-        else
-            return false;
+        
     }
     
     public class Enemy : Entity
     {
-        public Enemy(int maxHealth, Skill skill, EntitySO.TargetTypes targetType) : base(maxHealth, skill, targetType) {}
-
-        public void Attack()
-        {
-            skill.UseEffect(this, targetType);
-        }
-
+        public Enemy(int maxHealth, Skill skill, EntitySO.TargetTypes targetType, GameObject pf, Sprite sprite, float size) : base(maxHealth, skill, targetType,  pf, sprite, size) {}
+        
         public override void Die()
         {
             for (int i = 0; i < instance.ePosArr.Length; i++)
@@ -119,14 +129,14 @@ public class Enemies : MonoBehaviour
                     instance.ePosArr[i] = null;
                 }
             }
-
+            base.Die();
+            visual.SetActive(false);
             instance.activeEnemies.Remove(this);
         }
         
-        
         public override string ToString()
         {
-            return "Type: " + skill + "\n"
+            return "Skill: " + skill.name + "\n"
                     +"Health: " + Health + "\n"
                     +"isDead: " + IsDead() + "\n";
         }

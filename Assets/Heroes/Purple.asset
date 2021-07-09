@@ -10,10 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1a26a97b3c8f4ce498a22aaf06c61385, type: 3}
-  m_Name: Red
+  m_Name: Purple
   m_EditorClassIdentifier: 
-  associatedGem: 4
-  health: 120
+  skill: {fileID: 4895318710862800306, guid: e4462ee8872dabe428ce46cf9d10e3fa, type: 3}
+  targets: 1
+  health: 100
+  visualPrefab: {fileID: 3549057467594959623, guid: 0ed4e5aad5f7c6f428785fa38d398f78, type: 3}
+  sprite: {fileID: 21300000, guid: 3a167be7e1214a44aa2c7e81a0390201, type: 3}
+  associatedGem: 3
   maxCharge: 100
   chargeIncrease: 10
-  sprite: {fileID: 21300000, guid: 410470742a4a0e4438ac00631ee30aa9, type: 3}

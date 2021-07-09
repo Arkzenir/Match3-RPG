@@ -17,10 +17,10 @@ public abstract class Skill : MonoBehaviour
                 t = Enemies.instance.activeEnemies[Random.Range(0, Enemies.instance.activeEnemies.Count)];
                 break;
             case EntitySO.TargetTypes.Self when caller is Heroes.Hero:
-                t = Heroes.instance.heroes[Random.Range(0, Heroes.instance.heroes.Count)];
+                t = Heroes.instance.heroes[Random.Range(0, Heroes.instance.heroes.Length)];
                 break;
             case EntitySO.TargetTypes.Other when caller is Enemies.Enemy:
-                t = Heroes.instance.heroes[Random.Range(0, Heroes.instance.heroes.Count)];
+                t = Heroes.instance.heroes[Random.Range(0, Heroes.instance.heroes.Length)];
                 break;
             case EntitySO.TargetTypes.Other when caller is Heroes.Hero:
                 t = Enemies.instance.activeEnemies[Random.Range(0, Enemies.instance.activeEnemies.Count)];

@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdd354578b80fe644a42cf135e7093af, type: 3}
   m_Name: Fire Lord
   m_EditorClassIdentifier: 
+  skill: {fileID: 2236027669762132935, guid: 569d4d9218655944f9b4df038a421f94, type: 3}
+  targets: 1
   health: 150
+  visualPrefab: {fileID: 5553827372484543316, guid: 1b4f5dbdc89784d4ab44e7baf49d8f36, type: 3}
+  sprite: {fileID: 21300000, guid: ed3f58326c0d27f48812f7c488fee474, type: 3}
   size: 3
-  sprite: {fileID: 21300000, guid: 6a114df6ce8152c4abf5e6fa79200920, type: 3}

@@ -4,8 +4,5 @@ using UnityEngine;
 [CreateAssetMenu()]
 public class EnemySO : EntitySO
 {
-    [SerializeField, SerializeReference]
     public int size;
-    public Sprite sprite;
-
 }

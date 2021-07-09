@@ -11,10 +11,12 @@ public class DamageAll : Skill
     }
     public override void UseEffect(Entity target, EntitySO.TargetTypes targetType)
     {
-        foreach (var enemy in Enemies.instance.activeEnemies)
+        for (int i = 0; i < Enemies.instance.activeEnemies.Count; i++)
         {
-            if (enemy != null)
-                Effect(enemy);
+            if (Enemies.instance.activeEnemies[i] != null)
+            {
+                Effect(Enemies.instance.activeEnemies[i]);
+            }
         }
     }
 }
