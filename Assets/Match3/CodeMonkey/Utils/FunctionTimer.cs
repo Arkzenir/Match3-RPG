@@ -134,10 +134,7 @@ namespace CodeMonkey.Utils {
                 UnityEngine.Object.Destroy(gameObject);
             }
         }
-
-
-
-
+        
         /*
          * Class to trigger Actions manually without creating a GameObject
          * */

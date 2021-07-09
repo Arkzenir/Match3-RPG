@@ -46,6 +46,7 @@ public class EntityVisual : MonoBehaviour
             mouseWorldPosition.y -= heroGrid.GetCellSize();
             heroGrid.GetXY(mouseWorldPosition, out touchX, out touchY);
             heroGrid.GetGridObject(touchX, touchY).Entity.UseSkill();
+            Match3.instance.TryIsGameOver();
         }
     }
 

@@ -106,7 +106,7 @@ public class Match3 : MonoBehaviour
 
             if (linkedGemGridPositionList.Count >= 4) {
                 // More than 4 linked
-                score += 200;
+                //score += 200;
 
                 // Special Explosion Gem
                 GemGridPosition explosionOriginGemGridPosition = linkedGemGridPositionList[0];

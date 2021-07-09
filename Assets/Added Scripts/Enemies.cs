@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using TMPro;
 using UnityEngine;
 
@@ -15,6 +16,8 @@ public class Enemies : MonoBehaviour
     public Enemy[] ePosArr;
     public List<Enemy> activeEnemies;
 
+    
+    
     private void Awake()
     {
         if (instance == null || instance == this)
@@ -61,7 +64,6 @@ public class Enemies : MonoBehaviour
     {
         Match3.GemGridPosition gemGridPosition = sender as Match3.GemGridPosition;
         
-//TODO: Link this to UI
         if (ePosArr[e.x] != null)
         {
             enemyTakeDamage(e.x, e.gemType.damage);

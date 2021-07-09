@@ -154,7 +154,7 @@ public class Match3Visual : MonoBehaviour {
 
                 break;
             case State.EnemyTurn:
-                TrySetStateWaitingForUser();
+                FunctionTimer.Create(TrySetStateWaitingForUser, 0.1f);
                 break;
             case State.WaitingForUser:
                 if (Input.GetMouseButtonDown(0))
@@ -224,7 +224,6 @@ public class Match3Visual : MonoBehaviour {
             Debug.Log("Game Over!");
             SetState(State.GameOver);
         } else {
-            
             if (state == State.TryFindMatches && numOfMatched > 0)
             {
                 SetState(State.EnemyTurn);
