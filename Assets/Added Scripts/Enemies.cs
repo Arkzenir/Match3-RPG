@@ -37,6 +37,8 @@ public class Enemies : MonoBehaviour
         activeEnemies = new List<Enemy>();
         if (!SetUpArray())
             Debug.Log("Enemy set up failed at array stage");
+        else
+            EntityVisual.instance.SetUpEnemyVisuals();
     }
 
     private void Visual_OnOnStateChanged(object sender, Match3Visual.OnStateChangedEventArgs e)

@@ -24,20 +24,7 @@ public class EntityVisual : MonoBehaviour
         else
             DestroyImmediate(this);
     }
-
-    private void Start()
-    {
-        StartCoroutine(LateStart(0.5f));
-    }
     
-    IEnumerator LateStart(float waitTime)
-    {
-        yield return new WaitForSeconds(waitTime);
-        SetUpHeroVisuals();
-        SetUpEnemyVisuals();
-    }
-
-
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -51,7 +38,7 @@ public class EntityVisual : MonoBehaviour
     }
 
 
-    private void SetUpEnemyVisuals()
+    public void SetUpEnemyVisuals()
     {
         enemyGrid = new Grid<EntityGridObject>(
             Match3.instance.GetGridWidth(), 1, 1f, new Vector3(0, Match3.instance.GetGridHeight() + ENEMY_GRID_OFFSET),
@@ -96,7 +83,7 @@ public class EntityVisual : MonoBehaviour
         }
     }
 
-    private void SetUpHeroVisuals()
+    public void SetUpHeroVisuals()
     {
         heroGrid = new Grid<EntityGridObject>(
             Match3.instance.GetGridWidth(), 1, (float) Match3.instance.GetGridWidth() / Heroes.HERO_COUNT, new Vector3(0, Match3.instance.GetGridHeight() + HERO_GRID_OFFSET),

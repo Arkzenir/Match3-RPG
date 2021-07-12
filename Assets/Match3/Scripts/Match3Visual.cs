@@ -24,19 +24,20 @@ public class Match3Visual : MonoBehaviour {
         EnemyTurn,
         GameOver,
     }
-
-    [SerializeField] private Transform pfGemGridVisual;
+    
     [SerializeField] private Transform pfBackgroundGridVisual;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private Match3 match3;
 
     private Grid<Match3.GemGridPosition> grid;
-    private Enemies enemies;
+
     private Dictionary<Match3.GemGrid, GemGridVisual> gemGridDictionary;
 
     private bool isSetup;
     private State state;
     private float busyTimer;
+    private int busyCount;
+    public float DESTROY_THRESHOLD;
     private Action onBusyTimerElapsedAction;
 
     private int numOfMatched = 0;
@@ -68,8 +69,6 @@ public class Match3Visual : MonoBehaviour {
         this.match3 = match3;
         this.grid = grid;
 
-        enemies = Enemies.instance;
-        
         float cameraYOffset = 1f;
         cameraTransform.position = new Vector3(grid.GetWidth() * .5f, grid.GetHeight() * .5f + cameraYOffset, cameraTransform.position.z);
 
@@ -89,20 +88,22 @@ public class Match3Visual : MonoBehaviour {
                 position = new Vector3(position.x, -8);
 
                 // Visual Transform
-                Transform gemGridVisualTransform = Instantiate(pfGemGridVisual, position, Quaternion.identity);
-                gemGridVisualTransform.Find("sprite").GetComponent<SpriteRenderer>().sprite = gemGrid.GetGem().sprite;
+                //Transform gemGridVisualTransform = Instantiate(pfGemGridVisual, position, Quaternion.identity);
+                Transform gemGridVisualTransform = GemPool.instance.SpawnFromPool(position, Quaternion.identity, gemGrid.GetGem().sprite).transform;
+                //gemGridVisualTransform.Find("sprite").GetComponent<SpriteRenderer>().sprite = gemGrid.GetGem().sprite;
 
                 GemGridVisual gemGridVisual = new GemGridVisual(gemGridVisualTransform, gemGrid);
 
                 gemGridDictionary[gemGrid] = gemGridVisual;
 
                 // Background Grid Visual
-                Instantiate(pfBackgroundGridVisual, grid.GetWorldPosition(x, y), Quaternion.identity);
+                Instantiate(pfBackgroundGridVisual, grid.GetWorldPosition(x, y), Quaternion.identity, transform);
+                
             }
         }
-
         SetBusyState(.5f, () => SetState(State.TryFindMatches));
-
+        busyCount = grid.GetHeight();
+        DESTROY_THRESHOLD = EntityVisual.ENEMY_GRID_OFFSET + Match3.instance.GetGridHeight() + 1;
         isSetup = true;
     }
 
@@ -112,8 +113,9 @@ public class Match3Visual : MonoBehaviour {
         Vector3 position = e.gemGridPosition.GetWorldPosition();
         position = new Vector3(position.x, -8);
 
-        Transform gemGridVisualTransform = Instantiate(pfGemGridVisual, position, Quaternion.identity);
-        gemGridVisualTransform.Find("sprite").GetComponent<SpriteRenderer>().sprite = e.gemGrid.GetGem().sprite;
+        //Transform gemGridVisualTransform = Instantiate(pfGemGridVisual, position, Quaternion.identity);
+        Transform gemGridVisualTransform = GemPool.instance.SpawnFromPool(position, Quaternion.identity, e.gemGrid.GetGem().sprite).transform;
+        //gemGridVisualTransform.Find("sprite").GetComponent<SpriteRenderer>().sprite = e.gemGrid.GetGem().sprite;
 
         GemGridVisual gemGridVisual = new GemGridVisual(gemGridVisualTransform, e.gemGrid);
 
@@ -125,6 +127,8 @@ public class Match3Visual : MonoBehaviour {
         Match3.GemGridPosition gemGridPosition = sender as Match3.GemGridPosition;
         if (gemGridPosition != null && gemGridPosition.GetGemGrid() != null) {
             gemGridPosition.GetGemGrid().SetGemXY(gemGridPosition.GetX(), e.y);
+            
+            //gemGridDictionary.Remove(gemGridPosition.GetGemGrid());
         }
     }
     
@@ -150,11 +154,12 @@ public class Match3Visual : MonoBehaviour {
                 if (busyTimer <= 0f)
                 {
                     onBusyTimerElapsedAction();
+                    SetState(State.TryFindMatches);
                 }
 
                 break;
             case State.EnemyTurn:
-                FunctionTimer.Create(TrySetStateWaitingForUser, 0.1f);
+                TrySetStateWaitingForUser(state);
                 break;
             case State.WaitingForUser:
                 if (Input.GetMouseButtonDown(0))
@@ -166,50 +171,60 @@ public class Match3Visual : MonoBehaviour {
                 }
                 break;
             case State.TryFindMatches:
-//TODO: The fall method only fires twice here
-                while (!match3.FallGemsIntoEmptyPositions())
+                if (busyCount < match3.GetGridHeight() - 1)
                 {
-                    SetBusyState(.4f, () => { match3.FallGemsIntoEmptyPositions(); });
-                    SetState(State.TryFindMatches);
-                    break;
-                }
-
-                //This works, but seems bugged because the falling method only fires twice
-                match3.SpawnNewMissingGridPositions();
-                
-                if (match3.TryFindMatchesAndDestroyThem())
-                {
-                    numOfMatched++;
-                    SetBusyState(.4f, () =>
-                    {
-                        match3.SpawnNewMissingGridPositions();
-
-                        SetBusyState(.5f, () => SetState(State.TryFindMatches));
-                    });
+                    busyCount++;
+                    SetBusyState(0.1f, () => { match3.FallGemsIntoEmptyPositions(); });
+                    
                 }
                 else
                 {
-                    TrySetStateWaitingForUser();
+                    busyCount = 0;
+                    if (match3.TryFindMatchesAndDestroyThem())
+                    {
+                        numOfMatched++;
+                        SetBusyState(.2f, () =>
+                        {
+                            SetState(State.TryFindMatches);
+                        });
+                    }
+                    else
+                    {
+                        match3.SpawnNewMissingGridPositions();
+                        TrySetStateWaitingForUser(state);
+                        numOfMatched = 0;
+                    }
                 }
-
                 break;
             case State.GameOver:
                 break;
         }
     }
 
+    private IEnumerator DelayEnemy(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SetState(State.Busy);
+    }
+
     private void UpdateVisual() {
         foreach (Match3.GemGrid gemGrid in gemGridDictionary.Keys)
         {
             gemGridDictionary[gemGrid].Update();
+            if (gemGridDictionary[gemGrid].GetWorldPos().y >= DESTROY_THRESHOLD)
+            {
+                //Exchange with "pool insert"
+                gemGridDictionary[gemGrid].DestroyVisual(0.2f);
+                gemGridDictionary.Remove(gemGrid);
+                break;
+            }
         }
     }
     
     public void RemoveGridPosition(int x, int y)
     {
-        match3.TryDestroyGemGridPosition(grid.GetGridObject(x,y));
-        match3.FallGemsIntoEmptyPositions();
-        SetBusyState(0.3f, () => SetState(State.TryFindMatches));
+        match3.TryGemGridPositionFly(grid.GetGridObject(x,y));
+        SetBusyState(0.2f, () => SetState(State.TryFindMatches));
     }
     
     private void SetBusyState(float busyTimer, Action onBusyTimerElapsedAction) {
@@ -218,21 +233,27 @@ public class Match3Visual : MonoBehaviour {
         this.onBusyTimerElapsedAction = onBusyTimerElapsedAction;
     }
 
-    private void TrySetStateWaitingForUser() {
+    private void TrySetStateWaitingForUser(State currState) {
         if (match3.TryIsGameOver()) {
             // Game Over!
             Debug.Log("Game Over!");
             SetState(State.GameOver);
         } else {
-            if (state == State.TryFindMatches && numOfMatched > 0)
+            Debug.Log("State: " + currState);
+            if (currState == State.TryFindMatches && numOfMatched > 0)
             {
+                Debug.Log("Set State => " +  State.EnemyTurn);
                 SetState(State.EnemyTurn);
-            }else if (state == State.EnemyTurn)
+            }else if ((currState == State.EnemyTurn || currState == State.TryFindMatches) && numOfMatched == 0)
             {
-                SetState(State.TryFindMatches);
-            }else
+                Debug.Log("Set State => " +  State.WaitingForUser);
                 SetState(State.WaitingForUser);
-            numOfMatched = 0;
+            }
+            else
+            {
+                Debug.Log("Set State => " +  State.TryFindMatches);
+                SetState(State.TryFindMatches);
+            }
         }
     }
 
@@ -253,17 +274,20 @@ public class Match3Visual : MonoBehaviour {
         public GemGridVisual(Transform transform, Match3.GemGrid gemGrid) {
             this.transform = transform;
             this.gemGrid = gemGrid;
-
-            gemGrid.OnDestroyed += GemGrid_OnDestroyed;
         }
 
-        private void GemGrid_OnDestroyed(object sender, System.EventArgs e) {
-            transform.GetComponent<Animation>().Play();
-            Destroy(transform.gameObject, 0.2f);
+        public void DestroyVisual(float delay)
+        {
+            GemPool.instance.PutInPool(transform.gameObject, delay);
+        }
+
+        public Vector3 GetWorldPos()
+        {
+            return transform.position;
         }
         
         public void Update() {
-            
+
             Vector3 targetPosition = gemGrid.GetWorldPosition();
             Vector3 moveDir = (targetPosition - transform.position);
             float moveSpeed = 10f;

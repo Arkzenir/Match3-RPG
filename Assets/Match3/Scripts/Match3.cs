@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using CodeMonkey.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -134,7 +135,7 @@ public class Match3 : MonoBehaviour
             foreach (Vector2Int explosionGridPosition in explosionGridPositionList) {
                 if (IsValidPosition(explosionGridPosition.x, explosionGridPosition.y)) {
                     GemGridPosition gemGridPosition = grid.GetGridObject(explosionGridPosition.x, explosionGridPosition.y);
-                    TryDestroyGemGridPosition(gemGridPosition);
+                    TryGemGridPositionFly(gemGridPosition);
                 }
             }
         }
@@ -159,7 +160,7 @@ public class Match3 : MonoBehaviour
             score += 10;
             gemGridPosition.FlyGem();
             OnGemGridPositionFly?.Invoke(gemGridPosition, 
-                new OnNewGemGridPositionFlyEventArgs{x = gemGridPosition.GetX(),y = 8, gemType = gemGridPosition.GetGemGrid().GetGem()});
+                new OnNewGemGridPositionFlyEventArgs{x = gemGridPosition.GetX(),y = (int)Match3Visual.instance.DESTROY_THRESHOLD + 1, gemType = gemGridPosition.GetGemGrid().GetGem()});
             gemGridPosition.ClearGemGrid();
         }
         
@@ -472,12 +473,10 @@ public class Match3 : MonoBehaviour
 
         public void DestroyGem() {
             gemGrid?.Destroy();
-            grid.TriggerGridObjectChanged(x, y);
         }
 
         public void FlyGem()
         {
-            //Destroy self after some time?
             grid.TriggerGridObjectChanged(x,y);
         }
 
