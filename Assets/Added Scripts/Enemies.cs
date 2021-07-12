@@ -53,12 +53,12 @@ public class Enemies : MonoBehaviour
         
         if (e.state == Match3Visual.State.EnemyTurn)
         {
-            activeEnemies[eIndex].UseSkill();
             eIndex++;
             if (eIndex >= activeEnemies.Count)
                 eIndex = 0;
-            
             Debug.Log("eIndex: " + eIndex);
+            activeEnemies[eIndex].UseSkill();
+            
         }
     }
 

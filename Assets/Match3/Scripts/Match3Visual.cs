@@ -159,6 +159,15 @@ public class Match3Visual : MonoBehaviour {
 
                 break;
             case State.EnemyTurn:
+                if (!match3.TryFindMatchesAndDestroyThem())
+                {
+                    numOfMatched = 0;
+                }
+                else
+                {
+                    numOfMatched++;
+                }
+                
                 TrySetStateWaitingForUser(state);
                 break;
             case State.WaitingForUser:
@@ -192,7 +201,6 @@ public class Match3Visual : MonoBehaviour {
                     {
                         match3.SpawnNewMissingGridPositions();
                         TrySetStateWaitingForUser(state);
-                        numOfMatched = 0;
                     }
                 }
                 break;
