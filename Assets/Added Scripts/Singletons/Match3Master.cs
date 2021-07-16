@@ -1,8 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GemGridVisualDrag : MonoBehaviour
+public class Match3Master : MonoBehaviour
 {
     // Start is called before the first frame update
     void Start()
