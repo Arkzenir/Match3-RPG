@@ -71,8 +71,6 @@ public class Match3 : MonoBehaviour
         grid = new Grid<GemGridPosition>(gridWidth, gridHeight, 1f, Vector3.zero, (Grid<GemGridPosition> g, int x, int y) => new GemGridPosition(g, x, y));
 
         // Initialize Grid
-        
-//TODO: Fix accidental match 3 on randomised initialisation
         for (int x = 0; x < gridWidth; x++)
         {
                 for (int y = 0; y < gridHeight; y++)
@@ -477,6 +475,10 @@ public class Match3 : MonoBehaviour
 
         public void FlyGem()
         {
+            if (gemGrid.GetGem().type != GemSO.GemType.Standard)
+            {
+                gemGrid.GetGem().booster.UseBooster(x,y,this);
+            }
             grid.TriggerGridObjectChanged(x,y);
         }
 
@@ -509,19 +511,18 @@ public class Match3 : MonoBehaviour
             this.gem = gem;
             this.x = x;
             this.y = y;
-
             isDestroyed = false;
         }
 
         public GemSO GetGem() {
             return gem;
         }
+        
 
         public Vector3 GetWorldPosition() {
             return new Vector3(x, y);
         }
         
-
         public void SetGemXY(int x, int y) {
             this.x = x;
             this.y = y;
@@ -532,7 +533,6 @@ public class Match3 : MonoBehaviour
             OnDestroyed?.Invoke(this, EventArgs.Empty);
         }
         
-
         public override string ToString() {
             return isDestroyed.ToString();
         }

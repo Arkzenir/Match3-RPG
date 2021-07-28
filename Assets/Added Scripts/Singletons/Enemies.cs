@@ -56,7 +56,7 @@ public class Enemies : MonoBehaviour
             eIndex++;
             if (eIndex >= activeEnemies.Count)
                 eIndex = 0;
-            Debug.Log("eIndex: " + eIndex);
+            //Debug.Log("eIndex: " + eIndex);
             activeEnemies[eIndex].UseSkill();
             
         }

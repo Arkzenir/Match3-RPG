@@ -162,13 +162,12 @@ public class Match3Visual : MonoBehaviour {
                 if (!match3.TryFindMatchesAndDestroyThem())
                 {
                     numOfMatched = 0;
+                    TrySetStateWaitingForUser(state);
                 }
                 else
                 {
                     numOfMatched++;
                 }
-                
-                TrySetStateWaitingForUser(state);
                 break;
             case State.WaitingForUser:
                 if (Input.GetMouseButtonDown(0))
@@ -184,7 +183,6 @@ public class Match3Visual : MonoBehaviour {
                 {
                     busyCount++;
                     SetBusyState(0.1f, () => { match3.FallGemsIntoEmptyPositions(); });
-                    
                 }
                 else
                 {
@@ -247,19 +245,24 @@ public class Match3Visual : MonoBehaviour {
             Debug.Log("Game Over!");
             SetState(State.GameOver);
         } else {
-            Debug.Log("State: " + currState);
+            Debug.Log("Num of matched: " + numOfMatched);
             if (currState == State.TryFindMatches && numOfMatched > 0)
             {
-                Debug.Log("Set State => " +  State.EnemyTurn);
+                if (numOfMatched == 1)
+                {
+                    Debug.Log("User spawn");
+                }
+                else
+                {
+                    Debug.Log("Random spawn");
+                }
                 SetState(State.EnemyTurn);
             }else if ((currState == State.EnemyTurn || currState == State.TryFindMatches) && numOfMatched == 0)
             {
-                Debug.Log("Set State => " +  State.WaitingForUser);
                 SetState(State.WaitingForUser);
             }
             else
             {
-                Debug.Log("Set State => " +  State.TryFindMatches);
                 SetState(State.TryFindMatches);
             }
         }
