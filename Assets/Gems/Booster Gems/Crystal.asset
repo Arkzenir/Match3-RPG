@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e8b03160f09f0304998f2f5609f360d8, type: 3}
-  m_Name: Star
+  m_Name: Crystal
   m_EditorClassIdentifier: 
   damage: 10
-  booster: {fileID: 0}
+  booster: {fileID: 2922658240801583453, guid: 9bd6399d84f89b644863e820b0e7beaf, type: 3}
   color: 0
-  type: 3
-  sprite: {fileID: 0}
+  type: 5
+  sprite: {fileID: 21300000, guid: 0cdb70a2efa9f7348960326cc6fe2f97, type: 3}

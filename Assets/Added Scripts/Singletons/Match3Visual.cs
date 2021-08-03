@@ -111,10 +111,42 @@ public class Match3Visual : MonoBehaviour {
 
     private void Match3_OnNewGemGridSpawned(object sender, Match3.OnNewGemGridSpawnedEventArgs e) {
         Vector3 position = e.gemGridPosition.GetWorldPosition();
-        position = new Vector3(position.x, -8);
-
+        
+        Transform gemGridVisualTransform;
+        Transform pfGemGridVisual = GemPool.instance.gemPrefab.transform;
         //Transform gemGridVisualTransform = Instantiate(pfGemGridVisual, position, Quaternion.identity);
-        Transform gemGridVisualTransform = GemPool.instance.SpawnFromPool(position, Quaternion.identity, e.gemGrid.GetGem().sprite).transform;
+        if (e.gemGrid.GetGem().type == GemSO.GemType.Standard)
+        {
+            position = new Vector3(position.x, -8);
+            gemGridVisualTransform = GemPool.instance.SpawnFromPool(position, Quaternion.identity, e.gemGrid.GetGem().sprite).transform;
+        }
+        else
+        {
+            gemGridVisualTransform = Instantiate(pfGemGridVisual, position, Quaternion.identity);
+            Color gemColor = Color.white;
+
+            switch (e.gemGrid.GetGem().color)
+            {
+                case GemSO.GemColor.Blue:
+                    gemColor = Color.blue;
+                    break;
+                case GemSO.GemColor.Green:
+                    gemColor = Color.green;
+                    break;
+                case GemSO.GemColor.Orange:
+                    gemColor = Color.yellow;
+                    break;
+                case GemSO.GemColor.Purple:
+                    gemColor = Color.magenta;
+                    break;
+                case GemSO.GemColor.Red:
+                    gemColor = Color.red;
+                    break;
+            }
+
+            gemGridVisualTransform.Find("sprite").GetComponent<SpriteRenderer>().color = gemColor;
+        }
+        
         //gemGridVisualTransform.Find("sprite").GetComponent<SpriteRenderer>().sprite = e.gemGrid.GetGem().sprite;
 
         GemGridVisual gemGridVisual = new GemGridVisual(gemGridVisualTransform, e.gemGrid);
@@ -163,10 +195,6 @@ public class Match3Visual : MonoBehaviour {
                 {
                     numOfMatched = 0;
                     TrySetStateWaitingForUser(state);
-                }
-                else
-                {
-                    numOfMatched++;
                 }
                 break;
             case State.WaitingForUser:
@@ -219,7 +247,6 @@ public class Match3Visual : MonoBehaviour {
             gemGridDictionary[gemGrid].Update();
             if (gemGridDictionary[gemGrid].GetWorldPos().y >= DESTROY_THRESHOLD)
             {
-                //Exchange with "pool insert"
                 gemGridDictionary[gemGrid].DestroyVisual(0.2f);
                 gemGridDictionary.Remove(gemGrid);
                 break;
@@ -245,23 +272,13 @@ public class Match3Visual : MonoBehaviour {
             Debug.Log("Game Over!");
             SetState(State.GameOver);
         } else {
-            Debug.Log("Num of matched: " + numOfMatched);
             if (currState == State.TryFindMatches && numOfMatched > 0)
             {
-                if (numOfMatched == 1)
-                {
-                    Debug.Log("User spawn");
-                }
-                else
-                {
-                    Debug.Log("Random spawn");
-                }
                 SetState(State.EnemyTurn);
             }else if ((currState == State.EnemyTurn || currState == State.TryFindMatches) && numOfMatched == 0)
             {
                 SetState(State.WaitingForUser);
-            }
-            else
+            }else
             {
                 SetState(State.TryFindMatches);
             }
@@ -270,6 +287,7 @@ public class Match3Visual : MonoBehaviour {
 
     private void SetState(State state) {
         this.state = state;
+        Utils.ResetSwitchLists();
         OnStateChanged?.Invoke(this, new OnStateChangedEventArgs{state = state});
     }
 

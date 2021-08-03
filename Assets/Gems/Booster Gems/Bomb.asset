@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e8b03160f09f0304998f2f5609f360d8, type: 3}
-  m_Name: Vertical Rocket
+  m_Name: Bomb
   m_EditorClassIdentifier: 
   damage: 10
-  booster: {fileID: 0}
-  color: 5
-  type: 1
-  sprite: {fileID: 0}
+  booster: {fileID: 876363618995235196, guid: 09cc2d33b1bba6042a01fee0f73f082e, type: 3}
+  color: 0
+  type: 4
+  sprite: {fileID: 21300000, guid: d877a2a108bf39b45a8c89531b08a5e7, type: 3}

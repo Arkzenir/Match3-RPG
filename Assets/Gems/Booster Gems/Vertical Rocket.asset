@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e8b03160f09f0304998f2f5609f360d8, type: 3}
-  m_Name: Crystal
+  m_Name: Vertical Rocket
   m_EditorClassIdentifier: 
   damage: 10
-  booster: {fileID: 0}
-  color: 0
-  type: 0
-  sprite: {fileID: 0}
+  booster: {fileID: 6348824079859675191, guid: 230d2ee86d8540e49adf1c8f3a1e3b43, type: 3}
+  color: 3
+  type: 1
+  sprite: {fileID: 21300000, guid: 7d3a4987cbdfda949aeb3619de29ded9, type: 3}

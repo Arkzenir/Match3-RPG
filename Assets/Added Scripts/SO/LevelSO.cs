@@ -6,6 +6,7 @@ using UnityEngine;
 public class LevelSO : ScriptableObject {
     
     public List<GemSO> gemList;
+    public List<GemSO> boosterList;
     public List<EnemySO> enemyList;
     public List<HeroSO> heroList;
     public int width;

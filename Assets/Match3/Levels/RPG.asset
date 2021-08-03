@@ -18,6 +18,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3a140927d61acb6428169a771cabfdff, type: 2}
   - {fileID: 11400000, guid: 8fb30dabdaf845c4e80e38d8836e34e3, type: 2}
   - {fileID: 11400000, guid: 45e0be82ee937a9409ac5c6928093976, type: 2}
+  boosterList:
+  - {fileID: 11400000, guid: 6885637b624f16a4a9cc9b5745be38b9, type: 2}
+  - {fileID: 11400000, guid: 15a04e4890631c443950415069118a31, type: 2}
+  - {fileID: 11400000, guid: d7f1692d1cdd0be4f9705f836a6ea9d6, type: 2}
+  - {fileID: 11400000, guid: c5c733f32fb826c41a9af9c40ab48aa0, type: 2}
+  - {fileID: 11400000, guid: c3b6ecbce919d524b81047332d45311c, type: 2}
   enemyList:
   - {fileID: 11400000, guid: 0e23875dd53e6ed48ac38ac3751a5881, type: 2}
   - {fileID: 0}

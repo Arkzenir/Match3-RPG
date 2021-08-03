@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
  * */
 public class Match3 : MonoBehaviour
 {
-    public static Match3 instance; 
+    public static Match3 instance;
     
     public event EventHandler OnGemGridPositionDestroyed;
     public event EventHandler<OnNewGemGridPositionFlyEventArgs> OnGemGridPositionFly;
@@ -36,6 +36,8 @@ public class Match3 : MonoBehaviour
         public GemSO gemType;
     }
 
+    public List<Vector2> lastModifiedPositions = new List<Vector2>();
+    
     [SerializeField] private LevelSO levelSO;
     [SerializeField] private bool autoLoadLevel;
     [SerializeField] private bool match4Explosions; // Explode neighbour nodes on 4 match
@@ -92,51 +94,84 @@ public class Match3 : MonoBehaviour
 
 
     public bool TryFindMatchesAndDestroyThem() {
-        List<List<GemGridPosition>> allLinkedGemGridPositionList = GetAllMatch3Links();
+        List<GemGridPosition[,]> allLinkedGemGridPositionList = GetAllMatch3Links();
 
         bool foundMatch = false;
 
-        List<Vector2Int> explosionGridPositionList = new List<Vector2Int>();
-
-        foreach (List<GemGridPosition> linkedGemGridPositionList in allLinkedGemGridPositionList) {
-            foreach (GemGridPosition gemGridPosition in linkedGemGridPositionList) {
-                TryGemGridPositionFly(gemGridPosition);
-            }
-
-            if (linkedGemGridPositionList.Count >= 4) {
-                // More than 4 linked
-                //score += 200;
-
-                // Special Explosion Gem
-                GemGridPosition explosionOriginGemGridPosition = linkedGemGridPositionList[0];
-
-                int explosionX = explosionOriginGemGridPosition.GetX();
-                int explosionY = explosionOriginGemGridPosition.GetY();
-
-                // Explode all 8 neighbours
-                explosionGridPositionList.Add(new Vector2Int(explosionX - 1, explosionY - 1));
-                explosionGridPositionList.Add(new Vector2Int(explosionX + 0, explosionY - 1));
-                explosionGridPositionList.Add(new Vector2Int(explosionX + 1, explosionY - 1));
-                explosionGridPositionList.Add(new Vector2Int(explosionX - 1, explosionY + 0));
-                explosionGridPositionList.Add(new Vector2Int(explosionX + 1, explosionY + 0));
-                explosionGridPositionList.Add(new Vector2Int(explosionX - 1, explosionY + 1));
-                explosionGridPositionList.Add(new Vector2Int(explosionX + 0, explosionY + 1));
-                explosionGridPositionList.Add(new Vector2Int(explosionX + 1, explosionY + 1));
-            }
-
-            foundMatch = true;
-        }
-
-        bool spawnExplosion = match4Explosions;
-
-        if (spawnExplosion) {
-            foreach (Vector2Int explosionGridPosition in explosionGridPositionList) {
-                if (IsValidPosition(explosionGridPosition.x, explosionGridPosition.y)) {
-                    GemGridPosition gemGridPosition = grid.GetGridObject(explosionGridPosition.x, explosionGridPosition.y);
-                    TryGemGridPositionFly(gemGridPosition);
+        foreach (GemGridPosition[,] linkedGemGridPositionList in allLinkedGemGridPositionList)
+        {
+            GemSO.GemColor color = (GemSO.GemColor) (-1); //Invalid value by default 
+            int matchedGemCount = 0;
+            for (int i = 0; i < linkedGemGridPositionList.GetLength(0); i++)
+            {
+                for (int j = 0; j < linkedGemGridPositionList.GetLength(1); j++)
+                {
+                    if (linkedGemGridPositionList[i,j] != null)
+                    {
+                        matchedGemCount++;
+                        color = linkedGemGridPositionList[i, j].GetGemGrid().GetGem().color;
+                        Debug.Log("x:" + i);
+                        Debug.Log("y:" + j);
+                    }
                 }
             }
+
+            if (matchedGemCount == 3)
+            {
+                foreach (GemGridPosition gemGridPosition in linkedGemGridPositionList)
+                {
+                    if (gemGridPosition != null) TryGemGridPositionFly(gemGridPosition);
+                }
+                break;
+            }
+            
+            //Booster in effect
+            if (matchedGemCount >= 4) {
+                //Match the shape of matrix to reference matrix and spawn booster
+                bool boosterFound = true;
+                int typeIndex = 0;
+                foreach (var refList in Utils.GetReferenceMatrixList())
+                {
+                    typeIndex++; //Incremented here, since type 0 is "Standard"
+                    foreach (var matrix in refList)
+                    {
+                        //Rotate matrix in place 4 times to check for reference shape in all orientations
+                        for (int i = 0; i < 5; i++)
+                        {
+                            for (int j = 0; j < 5; j++)
+                            {
+                                if ((linkedGemGridPositionList[i, j] != null) != (matrix[i, j] == 1))
+                                    boosterFound = false;
+                                
+                                Utils.RotateMatrixInPlace(matrix);
+                            }
+                        }
+
+                        if (boosterFound)
+                            break;
+                    }
+                    if (boosterFound)
+                        break;
+                }
+
+                if (boosterFound)
+                {
+                    foreach (GemGridPosition gemGridPosition in linkedGemGridPositionList)
+                    {
+                        if (gemGridPosition != null) TryGemGridPositionFly(gemGridPosition);
+                    }
+                    
+                    //Choose random spot from last modified position list and spawn booster
+                    Debug.Log("LastPosList: " + Utils.GetLastPosList());
+                    Vector2 chosenPos = Utils.GetLastPosList()[UnityEngine.Random.Range(0, Utils.GetLastPosList().Count)];
+                    Debug.Log("chosenPos: " + chosenPos);
+                    SpawnNewBoosterGem((int)chosenPos.x, (int)chosenPos.y, typeIndex, color);
+                }
+            }
+            
+            foundMatch = true;
         }
+        
 
         OnScoreChanged?.Invoke(this, EventArgs.Empty);
 
@@ -156,14 +191,52 @@ public class Match3 : MonoBehaviour
         if (gemGridPosition.HasGemGrid())
         {
             score += 10;
-            gemGridPosition.FlyGem();
+            if (gemGridPosition.GetGemGrid().GetGem().type == GemSO.GemType.Standard)
+                gemGridPosition.FlyGem();
+            else
+                gemGridPosition.FlyAndBoostGem();
+            
+            Utils.AddToPosList(new Vector2(gemGridPosition.GetX(),gemGridPosition.GetY()));
             OnGemGridPositionFly?.Invoke(gemGridPosition, 
                 new OnNewGemGridPositionFlyEventArgs{x = gemGridPosition.GetX(),y = (int)Match3Visual.instance.DESTROY_THRESHOLD + 1, gemType = gemGridPosition.GetGemGrid().GetGem()});
             gemGridPosition.ClearGemGrid();
         }
-        
     }
 
+    public void TryGemGridPositionFly(int x, int y)
+    {
+        GemGridPosition pos = GetGridAtXY(x,y);
+        if (pos.HasGemGrid())
+        {
+            score += 10;
+            if (pos.GetGemGrid().GetGem().type == GemSO.GemType.Standard)
+                pos.FlyGem();
+            else
+                pos.FlyAndBoostGem();
+            
+            Utils.AddToPosList(new Vector2(pos.GetX(),pos.GetY()));
+            OnGemGridPositionFly?.Invoke(pos, 
+                new OnNewGemGridPositionFlyEventArgs{x = x,y = (int)Match3Visual.instance.DESTROY_THRESHOLD + 1, gemType = pos.GetGemGrid().GetGem()});
+            pos.ClearGemGrid();
+        }
+    }
+
+    public void SpawnNewBoosterGem(int x,int y, int type, GemSO.GemColor color)
+    {
+        GemGridPosition gemGridPosition = grid.GetGridObject(x, y);
+        
+        GemSO gem = levelSO.boosterList[type - 1];
+        gem.color = color;
+        GemGrid gemGrid = new GemGrid(gem, x, y);
+
+        gemGridPosition.SetGemGrid(gemGrid);
+
+        OnNewGemGridSpawned?.Invoke(gemGrid, new OnNewGemGridSpawnedEventArgs {
+            gemGrid = gemGrid,
+            gemGridPosition = gemGridPosition,
+        });
+    }
+    
     public void SpawnNewMissingGridPositions() {
         for (int x = 0; x < gridWidth; x++) {
             for (int y = 0; y < gridHeight; y++) {
@@ -215,15 +288,76 @@ public class Match3 : MonoBehaviour
     }
 
     public bool HasMatch3Link(int x, int y) {
-        List<GemGridPosition> linkedGemGridPositionList = GetMatch3Links(x, y);
-        return linkedGemGridPositionList != null && linkedGemGridPositionList.Count >= 3;
+        GemGridPosition[,] linkedGemGridPositionList = GetMatch3Links(x, y);
+
+        int matchedGemCount = 0;
+        if (linkedGemGridPositionList != null)
+        {
+            for (int i = 0; i < linkedGemGridPositionList.GetLength(0); i++)
+            {
+                for (int j = 0; j < linkedGemGridPositionList.GetLength(1); j++)
+                {
+                    if (linkedGemGridPositionList[i, j] != null)
+                    {
+                        matchedGemCount++;
+                    }
+                }
+            }
+
+            return matchedGemCount >= 3;
+        }
+        else
+        {
+            return false;
+        }
     }
 
-    public List<GemGridPosition> GetMatch3Links(int x, int y) {
+    public GemGridPosition[,] GetMatch3Links(int x, int y) {
         GemSO gemSO = GetGemSO(x, y);
 
         if (gemSO == null) return null;
 
+        GemGridPosition[,] matchArray = new GemGridPosition[5, 5];
+
+        int matchedGemCount = 0;
+
+        for (int i = 0; i < matchArray.GetLength(0); i++)
+        {
+            for (int j = 0; j < matchArray.GetLength(1); j++)
+            {
+                if (IsValidPosition(x + i, y + j))
+                {
+                    GemSO nextGemSO = GetGemSO(x + i, y + j);
+                    if (nextGemSO == gemSO)
+                    {
+                        if (i != 0 || j != 0)
+                        {
+                            bool cont = true;
+                            foreach (var pos in matchArray)
+                            {
+                                if (pos != null && (
+                                    (x + i - pos.GetX() == 1 && y + j - pos.GetY() == 0) ||
+                                    (x + i - pos.GetX() == 0 && y + j - pos.GetY() == 1)))
+                                    cont = false;
+                            }
+                            
+                            if (cont) 
+                                continue;
+                        }
+                        
+                        matchArray[i, j] = grid.GetGridObject(x + i, y + j);
+                        matchedGemCount++;
+                    }
+                }
+            }
+        }
+
+        if (matchedGemCount > 3)
+            return matchArray;
+        
+        //There are no boosters, check for regular 3 match
+        matchArray = new GemGridPosition[5, 5];
+        
         int rightLinkAmount = 0;
         for (int i = 1; i < gridWidth; i++) {
             if (IsValidPosition(x + i, y)) {
@@ -260,14 +394,16 @@ public class Match3 : MonoBehaviour
 
         int horizontalLinkAmount = 1 + leftLinkAmount + rightLinkAmount; // This Gem + left + right
 
-        if (horizontalLinkAmount >= 3) {
+        if (horizontalLinkAmount == 3) {
             // Has 3 horizontal linked gems
-            List<GemGridPosition> linkedGemGridPositionList = new List<GemGridPosition>();
+            //List<GemGridPosition> linkedGemGridPositionList = new List<GemGridPosition>();
             int leftMostX = x - leftLinkAmount;
-            for (int i = 0; i < horizontalLinkAmount; i++) {
-                linkedGemGridPositionList.Add(grid.GetGridObject(leftMostX + i, y));
+            for (int i = 0; i < horizontalLinkAmount; i++)
+            {
+                matchArray[0, i] = grid.GetGridObject(leftMostX + i, y);
+                //linkedGemGridPositionList.Add(grid.GetGridObject(leftMostX + i, y));
             }
-            return linkedGemGridPositionList;
+            return matchArray;
         }
 
 
@@ -307,28 +443,30 @@ public class Match3 : MonoBehaviour
 
         int verticalLinkAmount = 1 + downLinkAmount + upLinkAmount; // This Gem + down + up
 
-        if (verticalLinkAmount >= 3) {
+        if (verticalLinkAmount == 3) {
             // Has 3 vertical linked gems
-            List<GemGridPosition> linkedGemGridPositionList = new List<GemGridPosition>();
+            //List<GemGridPosition> linkedGemGridPositionList = new List<GemGridPosition>();
             int downMostY = y - downLinkAmount;
-            for (int i = 0; i < verticalLinkAmount; i++) {
-                linkedGemGridPositionList.Add(grid.GetGridObject(x, downMostY + i));
+            for (int i = 0; i < verticalLinkAmount; i++)
+            {
+                matchArray[i, 0] = grid.GetGridObject(x, downMostY + i);
+                //linkedGemGridPositionList.Add(grid.GetGridObject(x, downMostY + i));
             }
-            return linkedGemGridPositionList;
+            return matchArray;
         }
-
+        
         // No links
         return null;
     }
 
-    public List<List<GemGridPosition>> GetAllMatch3Links() {
+    public List<GemGridPosition[,]> GetAllMatch3Links() {
         // Finds all the links with the current grid
-        List<List<GemGridPosition>> allLinkedGemGridPositionList = new List<List<GemGridPosition>>();
+        List<GemGridPosition[,]> allLinkedGemGridPositionList = new List<GemGridPosition[,]>();
 
         for (int x = 0; x < gridWidth; x++) {
             for (int y = 0; y < gridHeight; y++) {
                 if (HasMatch3Link(x, y)) {
-                    List<GemGridPosition> linkedGemGridPositionList = GetMatch3Links(x, y);
+                    GemGridPosition[,] linkedGemGridPositionList = GetMatch3Links(x, y);
 
                     if (allLinkedGemGridPositionList.Count == 0) {
                         // First one
@@ -336,18 +474,49 @@ public class Match3 : MonoBehaviour
                     } else {
                         bool uniqueNewLink = true;
 
-                        foreach (List<GemGridPosition> tmpLinkedGemGridPositionList in allLinkedGemGridPositionList) {
-                            if (linkedGemGridPositionList.Count == tmpLinkedGemGridPositionList.Count) {
+                        foreach (GemGridPosition[,]  tmpLinkedGemGridPositionList in allLinkedGemGridPositionList) {
+                            
+                            int tmpMatchedCount = 0;
+                            int linkMatchedCount = 0;
+                            
+                            for (int i = 0; i < tmpLinkedGemGridPositionList.GetLength(0); i++)
+                            {
+                                for (int j = 0; j < tmpLinkedGemGridPositionList.GetLength(1); j++)
+                                {
+                                    if (tmpLinkedGemGridPositionList[i,j] != null)
+                                    {
+                                        tmpMatchedCount++;
+                                    }
+                                }
+                            }
+        
+                            for (int i = 0; i < linkedGemGridPositionList.GetLength(0); i++)
+                            {
+                                for (int j = 0; j < linkedGemGridPositionList.GetLength(1); j++)
+                                {
+                                    if (linkedGemGridPositionList[i,j] != null)
+                                    {
+                                        linkMatchedCount++;
+                                    }
+                                }
+                            }
+                            
+                            
+                            if (linkMatchedCount == tmpMatchedCount) {
                                 // Same number of links
                                 // Are they all the same?
                                 bool allTheSame = true;
-                                for (int i = 0; i < linkedGemGridPositionList.Count; i++) {
-                                    if (linkedGemGridPositionList[i] == tmpLinkedGemGridPositionList[i]) {
-                                        // This one is the same, link is not unique
-                                    } else {
-                                        // These don't match
-                                        allTheSame = false;
-                                        break;
+                                for (int i = 0; i < linkedGemGridPositionList.GetLength(0); i++)
+                                {
+                                    for (int j = 0; j < linkedGemGridPositionList.GetLength(1); j++)
+                                    {
+                                        if (linkedGemGridPositionList[i,j] == tmpLinkedGemGridPositionList[i,j]) {
+                                            // This one is the same, link is not unique
+                                        } else {
+                                            // These don't match
+                                            allTheSame = false;
+                                            break;
+                                        }
                                     }
                                 }
 
@@ -378,6 +547,11 @@ public class Match3 : MonoBehaviour
         if (gemGridPosition.GetGemGrid() == null) return null;
 
         return gemGridPosition.GetGemGrid().GetGem();
+    }
+
+    public GemGridPosition GetGridAtXY(int x, int y)
+    {
+        return grid.GetGridObject(x,y);
     }
 
     private bool IsValidPosition(int x, int y) {
@@ -456,7 +630,8 @@ public class Match3 : MonoBehaviour
         public int GetY() {
             return y;
         }
-
+        
+        
         public Vector3 GetWorldPosition() {
             return grid.GetWorldPosition(x, y);
         }
@@ -475,13 +650,15 @@ public class Match3 : MonoBehaviour
 
         public void FlyGem()
         {
-            if (gemGrid.GetGem().type != GemSO.GemType.Standard)
-            {
-                gemGrid.GetGem().booster.UseBooster(x,y,this);
-            }
             grid.TriggerGridObjectChanged(x,y);
         }
 
+        public void FlyAndBoostGem()
+        {
+            gemGrid.GetGem().booster.UseBooster(x,y,this);
+            grid.TriggerGridObjectChanged(x,y);
+        }
+        
         public bool HasGemGrid() {
             return gemGrid != null;
         }

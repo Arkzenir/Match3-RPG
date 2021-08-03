@@ -2,10 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public abstract class Booster : MonoBehaviour
 {
-    public List<Booster> intersectionVector = new List<Booster>();
-    public abstract void BoosterEffect(int x, int y);
+    [SerializeReference][SerializeField]
+    public List<Booster> intersectionVector;
+    public abstract void BoosterEffect(int x, int y, Match3.GemGridPosition caller);
 
     public virtual void UseBooster(int x, int y, Match3.GemGridPosition caller)
     {
@@ -13,6 +15,12 @@ public abstract class Booster : MonoBehaviour
             return;
 
         Booster usedEffect = this;
+
+        if (intersectionVector.Count == 0)
+        {
+            usedEffect.BoosterEffect(x, y, caller);
+            return;
+        }
 
         List<Match3.GemGridPosition> nearbyGems = new List<Match3.GemGridPosition>();
         nearbyGems.Add(caller);
@@ -24,9 +32,11 @@ public abstract class Booster : MonoBehaviour
         {
             for (int j = -1; j <= 1; j++)
             {
-                if (x + i > 0 && x + i < xMax && y + j > 0 && y + j < yMax)
+                if (x + i <= 0 || x + i >= xMax || y + j <= 0 || y + j >= yMax) continue;
+                if (Match3.instance.GetGridAtXY(x+i,y+j).HasGemGrid() 
+                    && Match3.instance.GetGridAtXY(x+i,y+j).GetGemGrid().GetGem().type != GemSO.GemType.Standard)
                 {
-                    //TODO: Add some way to determine nearby boosters and add them to nearbyGems
+                    nearbyGems.Add(Match3.instance.GetGridAtXY(x+i,y+j));
                 }
             }
         }
@@ -57,14 +67,14 @@ public abstract class Booster : MonoBehaviour
             {
                 if (i != maxIndex1 && i != maxIndex2)
                 {
-                    BoosterEffect(nearbyGems[i].GetX(),nearbyGems[i].GetY());
+                    BoosterEffect(nearbyGems[i].GetX(),nearbyGems[i].GetY(), caller);
                 }            
             }
         }
         
         //Finally, call the booster combined booster effect if it has been assigned
         //(By default, this is a normal effect since it is assigned to "this")
-        usedEffect.BoosterEffect(x,y);
+        usedEffect.BoosterEffect(x,y,caller);
         
     }
 }

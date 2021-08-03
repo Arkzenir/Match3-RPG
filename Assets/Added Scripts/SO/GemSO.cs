@@ -10,7 +10,6 @@ public class GemSO : ScriptableObject {
         Orange,
         Purple,
         Red,
-        Booster,
     }
     
     public enum GemType

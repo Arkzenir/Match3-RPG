@@ -671,6 +671,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a3ca2ffa0e409d40b9cff9b69d782a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lastModifiedPositions: []
   levelSO: {fileID: 11400000, guid: 9db6c2e04e416f746b39d6a912d9d07e, type: 2}
   autoLoadLevel: 1
   match4Explosions: 0
@@ -1367,7 +1368,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bc0a0fad80efa54d8155a23be99d786, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pfGemGridVisual: {fileID: 4475699381534582891, guid: 343952d9773918b4c86f551eb62ddd52, type: 3}
   pfBackgroundGridVisual: {fileID: 4475699381534582891, guid: 0f7247793e60d1d428d47afe5297b97a, type: 3}
   cameraTransform: {fileID: 1065981920}
   match3: {fileID: 723137816}
