@@ -13,6 +13,7 @@ public class LargeBomb : Booster
         {
             for (int j = -2; j <= 2; j++)
             {
+                if (i == 0 && j == 0) continue;
                 if (x + i <= 0 || x + i >= xMax || y + j <= 0 || y + j >= yMax) continue;
                 if (Match3.instance.GetGridAtXY(x+i,y+j).HasGemGrid())
                 {

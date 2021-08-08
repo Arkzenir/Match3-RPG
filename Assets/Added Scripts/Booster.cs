@@ -15,7 +15,9 @@ public abstract class Booster : MonoBehaviour
             return;
 
         Booster usedEffect = this;
-
+        
+        Debug.Log("First Break");
+        
         if (intersectionVector.Count == 0)
         {
             usedEffect.BoosterEffect(x, y, caller);
@@ -32,15 +34,26 @@ public abstract class Booster : MonoBehaviour
         {
             for (int j = -1; j <= 1; j++)
             {
-                if (x + i <= 0 || x + i >= xMax || y + j <= 0 || y + j >= yMax) continue;
+                if (x + i <= 0 || x + i >= xMax || y + j <= 0 || y + j >= yMax
+                || (i == 0 && j == 0)) continue;
                 if (Match3.instance.GetGridAtXY(x+i,y+j).HasGemGrid() 
                     && Match3.instance.GetGridAtXY(x+i,y+j).GetGemGrid().GetGem().type != GemSO.GemType.Standard)
                 {
                     nearbyGems.Add(Match3.instance.GetGridAtXY(x+i,y+j));
+                    Debug.Log("Gem added at x: " + (x+i) + "y: " + (y+j));
                 }
             }
         }
 
+        Debug.Log("Second Break");
+        if (nearbyGems.Count == 0)
+        {
+            usedEffect.BoosterEffect(x, y, caller);
+            return;
+        }
+        
+        Debug.Log("Third Break");
+        
         //There are 2 boosters in radius
         if (nearbyGems.Count > 1 && nearbyGems.Count < 3)
         {
@@ -75,6 +88,8 @@ public abstract class Booster : MonoBehaviour
         //Finally, call the booster combined booster effect if it has been assigned
         //(By default, this is a normal effect since it is assigned to "this")
         usedEffect.BoosterEffect(x,y,caller);
+        
+        caller.DestroyGem();
         
     }
 }

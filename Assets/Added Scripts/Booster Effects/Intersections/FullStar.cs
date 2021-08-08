@@ -11,6 +11,7 @@ public class FullStar : Booster
 
         for (int i = 0; i < xMax ; i++)
         {
+            if (i == x) continue;
             if (Match3.instance.GetGridAtXY(i,y).HasGemGrid())
             {
                 Match3.instance.GetGridAtXY(i,y).FlyGem();
@@ -19,6 +20,7 @@ public class FullStar : Booster
 
         for (int i = 0; i < yMax; i++)
         {
+            if (i == y) continue;
             if (Match3.instance.GetGridAtXY(x,i).HasGemGrid())
             {
                 Match3.instance.GetGridAtXY(x,i).FlyGem();

@@ -26,76 +26,266 @@ public static class Utils
         boosterReferenceList = new List<List<int[,]>>();
         lastList = new List<Vector2>();
         recentList = new List<Vector2>();
+
+        #region VRocket
         //Vertical Rocket
         boosterReferenceList.Add(new List<int[,]>());
         boosterReferenceList[0].Add(new int[5,5] 
-                {
-                    {0,0,0,0,0},
-                    {0,0,0,0,0},
-                    {0,0,0,0,0},
-                    {0,0,0,0,0},
-                    {1,1,1,1,0}
-                }
-            );
+            {
+                {1,1,1,1,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        /*
+        boosterReferenceList[0].Add(new int[5,5] 
+            {
+                {0,0,0,0,0},
+                {1,1,1,1,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
         
+        boosterReferenceList[0].Add(new int[5,5] 
+            {
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {1,1,1,1,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        
+        boosterReferenceList[0].Add(new int[5,5] 
+            {
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {1,1,1,1,0},
+                {0,0,0,0,0}
+            }
+        );
+
+        boosterReferenceList[0].Add(new int[5,5] 
+            {
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {1,1,1,1,0},
+            }
+        );
+        */
+        #endregion
+
+        #region HRocket
         //Horizontal Rocket
         boosterReferenceList.Add(new List<int[,]>());
         boosterReferenceList[1].Add(new int[5,5] 
             {
-                {0,0,0,0,0},
                 {1,0,0,0,0},
                 {1,0,0,0,0},
                 {1,0,0,0,0},
-                {1,0,0,0,0}
+                {1,0,0,0,0},
+                {0,0,0,0,0}
             }
         );
-        
+        /*
+        boosterReferenceList[1].Add(new int[5,5] 
+            {
+                {0,1,0,0,0},
+                {0,1,0,0,0},
+                {0,1,0,0,0},
+                {0,1,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        boosterReferenceList[1].Add(new int[5,5] 
+            {
+                {0,0,1,0,0},
+                {0,0,1,0,0},
+                {0,0,1,0,0},
+                {0,0,1,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        boosterReferenceList[1].Add(new int[5,5] 
+            {
+                {0,0,0,1,0},
+                {0,0,0,1,0},
+                {0,0,0,1,0},
+                {0,0,0,1,0},
+                {0,0,0,0,0}
+            }
+        );
+        boosterReferenceList[1].Add(new int[5,5] 
+            {
+                {0,0,0,0,1},
+                {0,0,0,0,1},
+                {0,0,0,0,1},
+                {0,0,0,0,1},
+                {0,0,0,0,0}
+            }
+        );
+        */
+        #endregion
+
+        #region Star
         //Star
         boosterReferenceList.Add(new List<int[,]>());
         boosterReferenceList[2].Add(new int[5,5] 
             {
-                {0,0,0,0,0},
-                {0,0,0,0,0},
-                {0,0,0,0,0},
                 {1,1,0,0,0},
-                {1,1,0,0,0}
+                {1,1,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
             }
         );
         
+        #endregion
+
+        #region Bomb
         //Bomb
         boosterReferenceList.Add(new List<int[,]>());
         boosterReferenceList[3].Add(new int[5,5] 
             {
-                {0,0,0,0,0},
-                {0,0,0,0,0},
+                {1,1,1,0,0},
                 {0,1,0,0,0},
                 {0,1,0,0,0},
-                {1,1,1,0,0}
+                {0,0,0,0,0},
+                {0,0,0,0,0}
             }
         );
         
         boosterReferenceList[3].Add(new int[5,5] 
             {
-                {0,0,0,0,0},
-                {0,0,0,0,0},
                 {0,0,1,0,0},
+                {1,1,1,0,0},
                 {0,0,1,0,0},
-                {1,1,1,0,0}
+                {0,0,0,0,0},
+                {0,0,0,0,0}
             }
         );
         
+        boosterReferenceList[3].Add(new int[5,5] 
+            {
+                {0,1,0,0,0},
+                {0,1,0,0,0},
+                {1,1,1,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        
+        boosterReferenceList[3].Add(new int[5,5] 
+            {
+                {1,0,0,0,0},
+                {1,1,1,0,0},
+                {1,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        
+        boosterReferenceList[3].Add(new int[5,5] 
+            {
+                {1,1,1,0,0},
+                {1,0,0,0,0},
+                {1,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        
+        boosterReferenceList[3].Add(new int[5,5] 
+            {
+                {1,1,1,0,0},
+                {0,0,1,0,0},
+                {0,0,1,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        
+        boosterReferenceList[3].Add(new int[5,5] 
+            {
+                {0,0,1,0,0},
+                {0,0,1,0,0},
+                {1,1,1,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        
+        boosterReferenceList[3].Add(new int[5,5] 
+            {
+                {1,0,0,0,0},
+                {1,0,0,0,0},
+                {1,1,1,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        #endregion
+
+        #region Crystal
         //Crystal
         boosterReferenceList.Add(new List<int[,]>());
+        boosterReferenceList[4].Add(new int[5,5] 
+            {
+                {1,1,1,1,1},
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        /*
+        boosterReferenceList[4].Add(new int[5,5] 
+            {
+                {0,0,0,0,0},
+                {1,1,1,1,1},
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        
+        boosterReferenceList[4].Add(new int[5,5] 
+            {
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {1,1,1,1,1},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        
+        boosterReferenceList[4].Add(new int[5,5] 
+            {
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {1,1,1,1,1},
+                {0,0,0,0,0}
+            }
+        );
+        
         boosterReferenceList[4].Add(new int[5,5] 
             {
                 {0,0,0,0,0},
                 {0,0,0,0,0},
                 {0,0,0,0,0},
                 {0,0,0,0,0},
-                {1,1,1,1,1}
+                {1,1,1,1,1},
             }
         );
-        
+        */
         boosterReferenceList[4].Add(new int[5,5] 
             {
                 {1,0,0,0,0},
@@ -105,6 +295,48 @@ public static class Utils
                 {1,0,0,0,0}
             }
         );
+        /*
+        boosterReferenceList[4].Add(new int[5,5] 
+            {
+                {0,1,0,0,0},
+                {0,1,0,0,0},
+                {0,1,0,0,0},
+                {0,1,0,0,0},
+                {0,1,0,0,0}
+            }
+        );
+        
+        boosterReferenceList[4].Add(new int[5,5] 
+            {
+                {0,0,1,0,0},
+                {0,0,1,0,0},
+                {0,0,1,0,0},
+                {0,0,1,0,0},
+                {0,0,1,0,0}
+            }
+        );
+        
+        boosterReferenceList[4].Add(new int[5,5] 
+            {
+                {0,0,0,1,0},
+                {0,0,0,1,0},
+                {0,0,0,1,0},
+                {0,0,0,1,0},
+                {0,0,0,1,0}
+            }
+        );
+        
+        boosterReferenceList[4].Add(new int[5,5] 
+            {
+                {0,0,0,0,1},
+                {0,0,0,0,1},
+                {0,0,0,0,1},
+                {0,0,0,0,1},
+                {0,0,0,0,1}
+            }
+        );
+        */
+        #endregion
     }
     
     public static List<List<int[,]>> GetReferenceMatrixList()
@@ -136,7 +368,11 @@ public static class Utils
 
     public static void AddToPosList(Vector2 add)
     {
-        recentList.Add(add);
+        if (lastList.Count == 0)
+        {
+            lastList.Add(add);
+        }else
+            recentList.Add(add);
     }
 
     public static void ResetSwitchLists()

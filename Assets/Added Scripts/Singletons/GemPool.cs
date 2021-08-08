@@ -35,14 +35,41 @@ public class GemPool : MonoBehaviour
         }
     }
 
-    public GameObject SpawnFromPool(Vector3 pos, Quaternion rot, Sprite sprite)
+    public GameObject SpawnFromPool(Vector3 pos, Quaternion rot, GemSO gem)
     {
         GameObject result = pool.Dequeue();
 
         result.SetActive(true);
         result.transform.position = pos;
         result.transform.rotation = rot;
-        result.transform.Find("sprite").GetComponent<SpriteRenderer>().sprite = sprite;
+        
+        Color gemColor = Color.white;
+
+        switch (gem.color)
+        {
+            case GemSO.GemColor.Blue:
+                gemColor = Color.blue;
+                break;
+            case GemSO.GemColor.Green:
+                gemColor = Color.green;
+                break;
+            case GemSO.GemColor.Orange:
+                gemColor = Color.yellow;
+                break;
+            case GemSO.GemColor.Purple:
+                gemColor = Color.magenta;
+                break;
+            case GemSO.GemColor.Red:
+                gemColor = Color.red;
+                break;
+        }
+        
+        result.transform.Find("sprite").GetComponent<SpriteRenderer>().sprite = gem.sprite;
+
+        if (gem.type != GemSO.GemType.Standard)
+        {
+            result.transform.Find("sprite").GetComponent<SpriteRenderer>().color = gemColor;
+        }
         
         pool.Enqueue(result);
 

@@ -9,6 +9,7 @@ public class VerticalRocket : Booster
     {
         for (int i = 0; i < Match3.instance.GetGridHeight(); i++)
         {
+            if (i == y) continue;
             if (Match3.instance.GetGridAtXY(x,i).HasGemGrid())
             {
                 Match3.instance.GetGridAtXY(x,i).FlyGem();

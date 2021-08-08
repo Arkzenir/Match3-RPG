@@ -7,6 +7,8 @@ public class Star : Booster
 {
     public override void BoosterEffect(int x, int y, Match3.GemGridPosition caller)
     {
+        Debug.Log("Star used at x: " + x + " y: " + y );
+        
         int xMax = Match3.instance.GetGridWidth();
         int yMax = Match3.instance.GetGridHeight();
 
@@ -14,9 +16,12 @@ public class Star : Booster
         {
             for (int j = -1; j <= 1; j++)
             {
-                if (x + i <= 0 || x + i >= xMax || y + j <= 0 || y + j >= yMax || i + j == 0 || Mathf.Abs(i + j) == 2) continue;
+                if (i == 0 && j == 0) continue;
+                if (x + i <= 0 || x + i >= xMax || y + j <= 0 || y + j >= yMax || i + j == 0 
+                    || Mathf.Abs(i + j) == 2) continue;
                 if (Match3.instance.GetGridAtXY(x+i,y+j).HasGemGrid())
                 {
+                    Debug.Log("Exists at x: " + x + " y: " + y );
                     Match3.instance.GetGridAtXY(x + i,y + j).FlyGem();
                 }
             }
