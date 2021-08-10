@@ -17,11 +17,11 @@ public class Star : Booster
             for (int j = -1; j <= 1; j++)
             {
                 if (i == 0 && j == 0) continue;
-                if (x + i <= 0 || x + i >= xMax || y + j <= 0 || y + j >= yMax || i + j == 0 
+                if (x + i < 0 || x + i >= xMax || y + j < 0 || y + j >= yMax || i + j == 0 
                     || Mathf.Abs(i + j) == 2) continue;
                 if (Match3.instance.GetGridAtXY(x+i,y+j).HasGemGrid())
                 {
-                    Debug.Log("Exists at x: " + x + " y: " + y );
+                    Debug.Log("Exists at x: " + (x+i) + " y: " + (y+j) );
                     Match3.instance.GetGridAtXY(x + i,y + j).FlyGem();
                 }
             }

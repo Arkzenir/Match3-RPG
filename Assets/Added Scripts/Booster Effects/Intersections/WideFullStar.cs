@@ -14,7 +14,7 @@ public class WideFullStar : Booster
             for (int i = 0; i < xMax; i++)
             {
                 if (i == x && k == 0) continue;
-                if (Match3.instance.GetGridAtXY(i + k, y).HasGemGrid())
+                if (Match3.instance.GetGridAtXY(i + k, y) != null && Match3.instance.GetGridAtXY(i + k, y).HasGemGrid())
                 {
                     Match3.instance.GetGridAtXY(i + k, y).FlyGem();
                 }
@@ -26,7 +26,7 @@ public class WideFullStar : Booster
             for (int i = 0; i < yMax; i++)
             {
                 if (i == y && k == 0) continue;
-                if (Match3.instance.GetGridAtXY(x, i + k).HasGemGrid())
+                if (Match3.instance.GetGridAtXY(x, i + k) != null && Match3.instance.GetGridAtXY(x, i + k).HasGemGrid())
                 {
                     Match3.instance.GetGridAtXY(x, i + k).FlyGem();
                 }

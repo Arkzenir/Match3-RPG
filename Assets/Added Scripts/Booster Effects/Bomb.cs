@@ -14,7 +14,7 @@ public class Bomb : Booster
             for (int j = -1; j <= 1; j++)
             {
                 if (i == 0 && j == 0) continue;
-                if (x + i <= 0 || x + i >= xMax || y + j <= 0 || y + j >= yMax) continue;
+                if (x + i < 0 || x + i >= xMax || y + j < 0 || y + j >= yMax) continue;
                 if (Match3.instance.GetGridAtXY(x+i,y+j).HasGemGrid())
                 {
                     Match3.instance.GetGridAtXY(x + i,y + j).FlyGem();

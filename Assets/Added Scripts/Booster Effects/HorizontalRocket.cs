@@ -12,7 +12,6 @@ public class HorizontalRocket : Booster
             if (i == x) continue;
             if (Match3.instance.GetGridAtXY(i,y).HasGemGrid())
             {
-                Debug.Log("Exists at x: " + i + " y: " + y );
                 Match3.instance.GetGridAtXY(i,y).FlyGem();
             }
         }

@@ -16,11 +16,11 @@ public class Crystal : Booster
             for (int j = 0; j < yMax; j++)
             {
                 if (i == x && j == y) continue;
-                if ( Match3.instance.GetGridAtXY(x+i,y+j) != null && Match3.instance.GetGridAtXY(x+i,y+j).HasGemGrid())
-                    //&& Match3.instance.GetGridAtXY(x+i,y+j).GetGemGrid().GetGem().color == caller.GetGemGrid().GetGem().color)
+                if ( Match3.instance.GetGridAtXY(i,j) != null && Match3.instance.GetGridAtXY(i,j).HasGemGrid()
+                    && Match3.instance.GetGridAtXY(i,j).GetGemGrid().GetGem().color == caller.GetGemGrid().GetGem().color)
                 {
-                    Debug.Log("Exists at x: " + x + " y: " + y );
-                    Match3.instance.GetGridAtXY(x + i,y + j).FlyGem();
+                    Debug.Log("Exists at x: " + i + " y: " + j );
+                    Match3.instance.GetGridAtXY(i,j).FlyGem();
                 }
             }
         }

@@ -16,8 +16,6 @@ public abstract class Booster : MonoBehaviour
 
         Booster usedEffect = this;
         
-        Debug.Log("First Break");
-        
         if (intersectionVector.Count == 0)
         {
             usedEffect.BoosterEffect(x, y, caller);
@@ -25,8 +23,7 @@ public abstract class Booster : MonoBehaviour
         }
 
         List<Match3.GemGridPosition> nearbyGems = new List<Match3.GemGridPosition>();
-        nearbyGems.Add(caller);
-        
+
         int xMax = Match3.instance.GetGridWidth();
         int yMax = Match3.instance.GetGridHeight();
         
@@ -34,7 +31,7 @@ public abstract class Booster : MonoBehaviour
         {
             for (int j = -1; j <= 1; j++)
             {
-                if (x + i <= 0 || x + i >= xMax || y + j <= 0 || y + j >= yMax
+                if (x + i < 0 || x + i >= xMax || y + j < 0 || y + j >= yMax
                 || (i == 0 && j == 0)) continue;
                 if (Match3.instance.GetGridAtXY(x+i,y+j).HasGemGrid() 
                     && Match3.instance.GetGridAtXY(x+i,y+j).GetGemGrid().GetGem().type != GemSO.GemType.Standard)
@@ -44,23 +41,24 @@ public abstract class Booster : MonoBehaviour
                 }
             }
         }
-
-        Debug.Log("Second Break");
+        
         if (nearbyGems.Count == 0)
         {
+            Debug.Log("Default use");
             usedEffect.BoosterEffect(x, y, caller);
             return;
         }
         
-        Debug.Log("Third Break");
         
-        //There are 2 boosters in radius
-        if (nearbyGems.Count > 1 && nearbyGems.Count < 3)
+        //There is a single booster next to it
+        if (nearbyGems.Count == 1)
         {
-            usedEffect = intersectionVector[(int)nearbyGems[2].GetGemGrid().GetGem().type - 1];
+            Debug.Log("Intersect");
+            usedEffect = intersectionVector[(int)nearbyGems[0].GetGemGrid().GetGem().type - 1];
+            nearbyGems[0].DestroyGem();
         }
-        //There are more than 2 boosters in radius
-        else if (nearbyGems.Count > 2)
+        //There are more than 1 booster in radius, making a total of 3
+        else if (nearbyGems.Count > 1)
         {
             int maxIndex1 = -1;
             int maxIndex2 = -1;
@@ -71,14 +69,27 @@ public abstract class Booster : MonoBehaviour
                 if ((int)gem.GetGemGrid().GetGem().type > maxIndex1) { maxIndex2 = maxIndex1; maxIndex1 = (int)gem.GetGemGrid().GetGem().type; }
                 else if ((int)gem.GetGemGrid().GetGem().type > maxIndex2) { maxIndex2 = (int)gem.GetGemGrid().GetGem().type; }
             }
+            
+            
 
             //Assign the intersection vector value to usedEffect
             usedEffect = nearbyGems[maxIndex1].GetGemGrid().GetGem().booster.intersectionVector[(int)nearbyGems[maxIndex2].GetGemGrid().GetGem().type - 1];
+            if (maxIndex1 > 0)
+            {
+                nearbyGems[maxIndex1].DestroyGem();
+            }
+
+            if (maxIndex2 > 0)
+            {
+                nearbyGems[maxIndex2].DestroyGem();
+            }
+            
+            Debug.Log("Intersection booster assigned to max");
             
             //For the values not used in intersection vector, call booster effect on their location
             for (int i = 0; i < nearbyGems.Count; i++)
             {
-                if (i != maxIndex1 && i != maxIndex2)
+                if (nearbyGems[i] != null)
                 {
                     BoosterEffect(nearbyGems[i].GetX(),nearbyGems[i].GetY(), caller);
                 }            

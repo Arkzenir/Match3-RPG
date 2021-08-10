@@ -18,12 +18,14 @@ boosterReferenceList[0].Add(new int[5,5]
 public static class Utils
 {
     private static List<List<int[,]>> boosterReferenceList;
+    private static List<int[,]> exclusionList;
     private static List<Vector2> lastList;
     private static List<Vector2> recentList;
     
     static Utils()
     {
         boosterReferenceList = new List<List<int[,]>>();
+        exclusionList = new List<int[,]>();
         lastList = new List<Vector2>();
         recentList = new List<Vector2>();
 
@@ -337,11 +339,37 @@ public static class Utils
         );
         */
         #endregion
+        
+        exclusionList.Add(new int[5,5] 
+            {
+                {1,1,0,0,0},
+                {0,1,1,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        
+        exclusionList.Add(new int[5,5] 
+            {
+                {1,0,0,0,0},
+                {1,1,0,0,0},
+                {0,1,0,0,0},
+                {0,0,0,0,0},
+                {0,0,0,0,0}
+            }
+        );
+        
     }
     
     public static List<List<int[,]>> GetReferenceMatrixList()
     {
         return boosterReferenceList;
+    }
+
+    public static List<int[,]> GetExclusionList()
+    {
+        return exclusionList;
     }
 
     public static void RotateMatrixInPlace(int[,] inMatrix)

@@ -101,7 +101,6 @@ public class Match3 : MonoBehaviour
 
         foreach (GemGridPosition[,] linkedGemGridPositionList in allLinkedGemGridPositionList)
         {
-            GemSO.GemColor color = (GemSO.GemColor) (-1); //Invalid value by default 
             int matchedGemCount = 0;
             for (int i = 0; i < linkedGemGridPositionList.GetLength(0); i++)
             {
@@ -114,7 +113,17 @@ public class Match3 : MonoBehaviour
                 }
             }
             
-            color = linkedGemGridPositionList[0, 0].GetGemGrid().GetGem().color;
+            var color = linkedGemGridPositionList[0, 0].GetGemGrid().GetGem().color;
+            
+            if (matchedGemCount == 3)
+            {
+                foreach (GemGridPosition gemGridPosition in linkedGemGridPositionList)
+                {
+                    if (gemGridPosition != null) TryGemGridPositionFly(gemGridPosition);
+                }
+                foundMatch = true;
+                break;
+            }
             
             //Booster in effect
             if (matchedGemCount >= 4) {
@@ -142,8 +151,6 @@ public class Match3 : MonoBehaviour
                                     toBeDestroyed.Add(linkedGemGridPositionList[i,j]);
                                     shapeMatrix[i, j] = 1;
                                 }
-                                //if ((linkedGemGridPositionList[i, j] != null) != (matrix[i, j] == 1))
-                                    //boosterNotFound = true;
                             }
                         }
                         
@@ -159,8 +166,6 @@ public class Match3 : MonoBehaviour
                             }
                         }
                         
-                        Debug.Log("Matrix Search");
-                        
                         if (!boosterNotFound)
                             break;
                     }
@@ -169,6 +174,7 @@ public class Match3 : MonoBehaviour
                         break;    
                 }
 
+                
                 if (!boosterNotFound)
                 {
                     Debug.Log("Booster Match");
@@ -184,19 +190,49 @@ public class Match3 : MonoBehaviour
                             Utils.GetLastPosList()[UnityEngine.Random.Range(0, Utils.GetLastPosList().Count - 1)];
                         SpawnNewBoosterGem((int) chosenPos.x, (int) chosenPos.y, typeIndex, color);
                     }
+
+                    foundMatch = true;
+                    break;
                 }
                 
-            }
-            
-            if (matchedGemCount == 3)
-            {
-                foreach (GemGridPosition gemGridPosition in linkedGemGridPositionList)
+                bool skip = true;
+                int[,] ignoreShapeMatrix = new int[5, 5];
+                foreach (var e in Utils.GetExclusionList())
                 {
-                    if (gemGridPosition != null) TryGemGridPositionFly(gemGridPosition);
+                    skip = true;
+                    for (int i = 0; i < 5; i++)
+                    {
+                        for (int j = 0; j < 5; j++)
+                        {
+                            if ((linkedGemGridPositionList[i, j] != null) && (e[i, j] == 1))
+                            {
+                                ignoreShapeMatrix[i, j] = 1;
+                            }
+                        }
+                    }
+                
+                    for (int i = 0; i < 5; i++)
+                    {
+                        for (int j = 0; j < 5; j++)
+                        {
+                            if (ignoreShapeMatrix[i,j] != e[i,j])
+                            {
+                                skip = false;
+                            }
+                        }
+                    }
                 }
+            
+                if (skip)
+                {
+                    Debug.Log("Excluded shape");
+                    foundMatch = false;
+                    break;
+                }
+
             }
             
-            foundMatch = true;
+            
         }
         
 
@@ -233,7 +269,7 @@ public class Match3 : MonoBehaviour
     public void TryGemGridPositionFly(int x, int y)
     {
         GemGridPosition pos = GetGridAtXY(x,y);
-        if (pos.HasGemGrid())
+        if (pos != null && pos.HasGemGrid())
         {
             score += 10;
             Utils.AddToPosList(new Vector2(pos.GetX(),pos.GetY()));
@@ -675,7 +711,7 @@ public class Match3 : MonoBehaviour
             gemGrid = null;
         }
 
-        public void DestroyGem() {
+        public void DestroyGemGrid() {
             gemGrid?.Destroy();
         }
 
@@ -683,16 +719,25 @@ public class Match3 : MonoBehaviour
         {
             instance.OnGemGridPositionFly?.Invoke(this, 
                 new OnNewGemGridPositionFlyEventArgs{x = x,y = (int)Match3Visual.instance.DESTROY_THRESHOLD + 1, gemType = GetGemGrid().GetGem()});
-            DestroyGem();
-            ClearGemGrid();
-            grid.TriggerGridObjectChanged(x,y);
+            RemoveGem();
         }
 
         public void FlyAndBoostGem()
         {
             gemGrid.GetGem().booster.UseBooster(x,y,this);
             instance.OnGemGridPositionDestroyed?.Invoke(this, EventArgs.Empty);
-            DestroyGem();
+            RemoveGem();
+        }
+
+        public void DestroyGem()
+        {
+            instance.OnGemGridPositionDestroyed?.Invoke(this, EventArgs.Empty);
+            RemoveGem();
+        }
+
+        private void RemoveGem()
+        {
+            DestroyGemGrid();
             ClearGemGrid();
             grid.TriggerGridObjectChanged(x,y);
         }
