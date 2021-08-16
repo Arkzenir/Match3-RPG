@@ -21,7 +21,7 @@ public static class Utils
     private static List<int[,]> exclusionList;
     private static List<Vector2> lastList;
     private static List<Vector2> recentList;
-    
+
     static Utils()
     {
         boosterReferenceList = new List<List<int[,]>>();

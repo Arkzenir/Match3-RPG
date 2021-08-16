@@ -21,7 +21,7 @@ public class GemPool : MonoBehaviour
     void Start()
     {
         var perGem = (Match3.instance.GetGridHeight() * Match3.instance.GetGridWidth()) / 2f;
-        size = (Mathf.CeilToInt(perGem) + 1) * Match3.instance.GetLevelSO().gemList.Count;
+        size = (Mathf.CeilToInt(perGem)) * Match3.instance.GetLevelSO().gemList.Count;
         
         pool = new Queue<GameObject>();
         if (gemPrefab != null)
@@ -39,52 +39,56 @@ public class GemPool : MonoBehaviour
     {
         GameObject result = pool.Dequeue();
 
-        result.SetActive(true);
-        result.transform.position = pos;
-        result.transform.rotation = rot;
         
         Color gemColor = Color.white;
-
-        switch (gem.color)
-        {
-            case GemSO.GemColor.Blue:
-                gemColor = Color.blue;
-                break;
-            case GemSO.GemColor.Green:
-                gemColor = Color.green;
-                break;
-            case GemSO.GemColor.Orange:
-                gemColor = Color.yellow;
-                break;
-            case GemSO.GemColor.Purple:
-                gemColor = Color.magenta;
-                break;
-            case GemSO.GemColor.Red:
-                gemColor = Color.red;
-                break;
-        }
         
         result.transform.Find("sprite").GetComponent<SpriteRenderer>().sprite = gem.sprite;
-
+        result.transform.Find("sprite").GetComponent<SpriteRenderer>().color = gemColor;
+        
         if (gem.type != GemSO.GemType.Standard)
         {
+            switch (gem.color)
+            {
+                case GemSO.GemColor.Blue:
+                    gemColor = Color.blue;
+                    break;
+                case GemSO.GemColor.Green:
+                    gemColor = Color.green;
+                    break;
+                case GemSO.GemColor.Orange:
+                    gemColor = Color.yellow;
+                    break;
+                case GemSO.GemColor.Purple:
+                    gemColor = Color.magenta;
+                    break;
+                case GemSO.GemColor.Red:
+                    gemColor = Color.red;
+                    break;
+            }
+            
             result.transform.Find("sprite").GetComponent<SpriteRenderer>().color = gemColor;
         }
         
-        pool.Enqueue(result);
+        result.transform.position = pos;
+        result.transform.rotation = rot;
+        result.SetActive(true);
 
         return result;
     }
+    
 
     public void PutInPool(GameObject obj, float delay)
     {
         StartCoroutine(WaitDestroy(obj, delay));
     }
-
+    
+    
     private IEnumerator WaitDestroy(GameObject obj,float delay)
     {
         yield return new WaitForSeconds(delay);
         obj.SetActive(false);
+        obj.transform.position = transform.position;
+        obj.transform.rotation = transform.rotation;
         pool.Enqueue(obj);
     }
 }

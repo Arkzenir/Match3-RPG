@@ -48,6 +48,7 @@ public class Match3 : MonoBehaviour
     private Grid<GemGridPosition> grid;
     private int score;
 
+    private List<GemGrid> toBeFlown = new List<GemGrid>();
     private void Awake()
     {
         if (instance == null)
@@ -195,6 +196,7 @@ public class Match3 : MonoBehaviour
                     break;
                 }
                 
+                /*
                 bool skip = true;
                 int[,] ignoreShapeMatrix = new int[5, 5];
                 foreach (var e in Utils.GetExclusionList())
@@ -229,7 +231,7 @@ public class Match3 : MonoBehaviour
                     foundMatch = false;
                     break;
                 }
-
+                */
             }
             
             
@@ -420,7 +422,50 @@ public class Match3 : MonoBehaviour
         }
 
         if (matchedGemCount > 3)
-            return matchArray;
+        {
+            int[,] shapeMatrix = new int[5, 5];
+            bool falseFlag = true;
+            for (int k = Utils.GetReferenceMatrixList().Count - 1; k >= 0; k--)
+            {
+                var refList = Utils.GetReferenceMatrixList()[k];
+                foreach (var matrix in refList)
+                {
+                    shapeMatrix = new int[5, 5];
+                    falseFlag = false;
+                    for (int i = 0; i < 5; i++)
+                    {
+                        for (int j = 0; j < 5; j++)
+                        {
+                            if ((matchArray[i, j] != null) && (matrix[i, j] == 1))
+                            {
+                                shapeMatrix[i, j] = 1;
+                            }
+                        }
+                    }
+                        
+
+                    for (int i = 0; i < 5; i++)
+                    {
+                        for (int j = 0; j < 5; j++)
+                        {
+                            if (shapeMatrix[i,j] != matrix[i,j])
+                            {
+                                falseFlag = true;
+                            }
+                        }
+                    }
+                        
+                    if (!falseFlag)
+                        break;
+                }
+
+                if (!falseFlag)
+                    break;    
+            }
+            
+            if(!falseFlag)
+                return matchArray;
+        }
         
         //There are no boosters, check for regular 3 match
         matchArray = new GemGridPosition[5, 5];
@@ -783,6 +828,7 @@ public class Match3 : MonoBehaviour
         public void SetGemXY(int x, int y) {
             this.x = x;
             this.y = y;
+            Match3Visual.instance.GetDict()[this].MoveSequence(new Vector3(x,y), 0.3f);
         }
 
         public void Destroy() {

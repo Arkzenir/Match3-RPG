@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8927987435029887474}
   - component: {fileID: 7787778879745351872}
+  - component: {fileID: -6080683289324807585}
   m_Layer: 0
   m_Name: TransmuteToStar
   m_TagString: Untagged
@@ -43,3 +44,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3141e930b6da0147a585ffd2f606dca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  intersectionVector: []
+--- !u!114 &-6080683289324807585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1383436114686574713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d386a8bfbb3d7f45be22dab5b24435b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  intersectionVector: []

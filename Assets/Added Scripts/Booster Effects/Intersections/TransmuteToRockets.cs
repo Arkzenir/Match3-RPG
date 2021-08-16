@@ -9,6 +9,9 @@ public class TransmuteToRockets : Booster
         int xMax = Match3.instance.GetGridWidth();
         int yMax = Match3.instance.GetGridHeight();
 
+        VerticalRocket v = GetComponent<VerticalRocket>();
+        HorizontalRocket h = GetComponent<HorizontalRocket>();
+
         for (int i = 0; i < xMax ; i++)
         {
             for (int j = 0; j < yMax; j++)
@@ -16,22 +19,18 @@ public class TransmuteToRockets : Booster
                 if (Match3.instance.GetGridAtXY(i,j).HasGemGrid() 
                     && Match3.instance.GetGridAtXY(i,j).GetGemGrid().GetGem().color == caller.GetGemGrid().GetGem().color)
                 {
-                    GemSO subject = Match3.instance.GetGridAtXY(i, j).GetGemGrid().GetGem();
                     if (Random.Range(0,1) == 0)
                     {
-                        subject.type = GemSO.GemType.HorizontalRocket;
-                        subject.booster = new HorizontalRocket();
+                        h.BoosterEffect(i,j,caller);
                     }
                     else
                     {
-                        subject.type = GemSO.GemType.VerticalRocket;
-                        subject.booster = new VerticalRocket();
+                        v.BoosterEffect(i,j,caller);
                     }
                     
                     //TODO: Change the sprite
-                    
+
                     //TODO: Add delay? (Might be better in the tween animation phase)
-                    Match3.instance.GetGridAtXY(i,j).FlyAndBoostGem();
                 }
             }
         }

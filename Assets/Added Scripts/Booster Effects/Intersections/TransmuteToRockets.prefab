@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2890060520240793973}
   - component: {fileID: 283045016863494514}
+  - component: {fileID: 26736238168200185}
+  - component: {fileID: 4644337116739579900}
   m_Layer: 0
   m_Name: TransmuteToRockets
   m_TagString: Untagged
@@ -43,3 +45,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c77a388f7e42f9439ff68568b702440, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  intersectionVector: []
+--- !u!114 &26736238168200185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3440813655746140581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 658c86dbcf9634b429eb81a87cfc5244, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  intersectionVector: []
+--- !u!114 &4644337116739579900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3440813655746140581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 941afdd74e9359947be7a61094ffc9a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  intersectionVector: []

@@ -36,8 +36,6 @@ public class Heroes : MonoBehaviour
         heroList = Match3.instance.GetLevelSO().heroList;
         if (!SetUpArray())
             Debug.Log("Hero set up failed at array stage");
-        else
-            EntityVisual.instance.SetUpHeroVisuals();    
     }
 
     private bool SetUpArray()
@@ -154,7 +152,7 @@ public class Heroes : MonoBehaviour
             {
                 if (instance.heroes[i] == this)
                 {
-                    instance.heroes[i] = null;
+                    instance.heroes[i].Die();
                     break;
                 }
             }

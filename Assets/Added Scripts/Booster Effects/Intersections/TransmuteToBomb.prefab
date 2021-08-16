@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6333465513313561698}
   - component: {fileID: 1533608146978921141}
+  - component: {fileID: 7349510140071393907}
   m_Layer: 0
   m_Name: TransmuteToBomb
   m_TagString: Untagged
@@ -43,3 +44,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c389f7d6bf160a74897f1ba9220c0271, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  intersectionVector: []
+--- !u!114 &7349510140071393907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8925485564644336744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b62b72ad1115f94aadc46b3b1755d3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  intersectionVector: []
