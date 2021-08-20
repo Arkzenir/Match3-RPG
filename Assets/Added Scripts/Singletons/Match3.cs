@@ -13,7 +13,7 @@ public class Match3 : MonoBehaviour
 {
     public static Match3 instance;
     
-    public event EventHandler OnGemGridPositionDestroyed;
+    public event EventHandler<OnGemGridPositionDestroyedEventArgs> OnGemGridPositionDestroyed;
     public event EventHandler<OnNewGemGridPositionFlyEventArgs> OnGemGridPositionFly;
     public event EventHandler<OnNewGemGridSpawnedEventArgs> OnNewGemGridSpawned;
     public event EventHandler<OnLevelSetEventArgs> OnLevelSet;
@@ -37,6 +37,11 @@ public class Match3 : MonoBehaviour
         public GemSO gemType;
     }
 
+    public class OnGemGridPositionDestroyedEventArgs : EventArgs
+    {
+        public bool intersect;
+    }
+    
     public List<Vector2> lastModifiedPositions = new List<Vector2>();
     
     [SerializeField] private LevelSO levelSO;
@@ -46,6 +51,7 @@ public class Match3 : MonoBehaviour
     private int gridWidth;
     private int gridHeight;
     private Grid<GemGridPosition> grid;
+    private Dictionary<GemGrid, Match3Visual.GemGridVisual> dict;
     private int score;
 
     private List<GemGrid> toBeFlown = new List<GemGrid>();
@@ -85,7 +91,7 @@ public class Match3 : MonoBehaviour
                 }
         }
 
-
+        dict = Match3Visual.instance.GetDict();
         score = 0;
         OnLevelSet?.Invoke(this, new OnLevelSetEventArgs { levelSO = levelSO, grid = grid });
     }
@@ -178,7 +184,7 @@ public class Match3 : MonoBehaviour
                 
                 if (!boosterNotFound)
                 {
-                    Debug.Log("Booster Match");
+                    float yTemp = toBeDestroyed[0].GetY();
                     foreach (GemGridPosition gemGridPosition in toBeDestroyed)
                     {
                         if (gemGridPosition != null) TryGemGridPositionFly(gemGridPosition);
@@ -187,8 +193,17 @@ public class Match3 : MonoBehaviour
                     //Choose random spot from last modified position list and spawn booster
                     if (Utils.GetLastPosList().Count > 0)
                     {
-                        Vector2 chosenPos =
-                            Utils.GetLastPosList()[UnityEngine.Random.Range(0, Utils.GetLastPosList().Count - 1)];
+                        Vector2 chosenPos;
+                        if (Utils.GetLastPosList().Count == 1)
+                        {
+                            chosenPos.x = Utils.GetLastPosList()[0].x;
+                            chosenPos.y = yTemp;
+                        }
+                        else
+                        {
+                            chosenPos =
+                                Utils.GetLastPosList()[UnityEngine.Random.Range(0, Utils.GetLastPosList().Count - 1)];
+                        }
                         SpawnNewBoosterGem((int) chosenPos.x, (int) chosenPos.y, typeIndex, color);
                     }
 
@@ -243,6 +258,7 @@ public class Match3 : MonoBehaviour
         return foundMatch;
     }
 
+    /*
     public void TryDestroyGemGridPosition(GemGridPosition gemGridPosition) {
         if (gemGridPosition.HasGemGrid()) {
             gemGridPosition.DestroyGem();
@@ -250,40 +266,25 @@ public class Match3 : MonoBehaviour
             gemGridPosition.ClearGemGrid();
         }
     }
-
+*/
     public void TryGemGridPositionFly(GemGridPosition gemGridPosition)
     {
         if (gemGridPosition.HasGemGrid())
         {
             Utils.AddToPosList(new Vector2(gemGridPosition.GetX(),gemGridPosition.GetY()));
             score += 10;
-            if (gemGridPosition.GetGemGrid().GetGem().type == GemSO.GemType.Standard)
-            {
-                gemGridPosition.FlyGem();
-            }
-            else
-            {
-                gemGridPosition.FlyAndBoostGem();
-            }
+            gemGridPosition.FlyGem();
         }
     }
 
     public void TryGemGridPositionFly(int x, int y)
     {
-        GemGridPosition pos = GetGridAtXY(x,y);
+        GemGridPosition pos = GetGridAtXY(x, y);
         if (pos != null && pos.HasGemGrid())
         {
             score += 10;
-            Utils.AddToPosList(new Vector2(pos.GetX(),pos.GetY()));
-            if (pos.GetGemGrid().GetGem().type == GemSO.GemType.Standard)
-            {
-                pos.FlyGem();
-            }
-            else
-            {
-                pos.FlyAndBoostGem();
-                //OnGemGridPositionDestroyed?.Invoke(pos, EventArgs.Empty);
-            }
+            Utils.AddToPosList(new Vector2(pos.GetX(), pos.GetY()));
+            pos.FlyGem();
         }
     }
 
@@ -384,7 +385,8 @@ public class Match3 : MonoBehaviour
     public GemGridPosition[,] GetMatch3Links(int x, int y) {
         GemSO gemSO = GetGemSO(x, y);
 
-        if (gemSO == null) return null;
+        //If we are going to add special interactions for matched boosters, change this
+        if (gemSO == null || gemSO.type != GemSO.GemType.Standard) return null; 
 
         GemGridPosition[,] matchArray = new GemGridPosition[5, 5];
 
@@ -423,14 +425,13 @@ public class Match3 : MonoBehaviour
 
         if (matchedGemCount > 3)
         {
-            int[,] shapeMatrix = new int[5, 5];
             bool falseFlag = true;
             for (int k = Utils.GetReferenceMatrixList().Count - 1; k >= 0; k--)
             {
                 var refList = Utils.GetReferenceMatrixList()[k];
                 foreach (var matrix in refList)
                 {
-                    shapeMatrix = new int[5, 5];
+                    var shapeMatrix = new int[5, 5];
                     falseFlag = false;
                     for (int i = 0; i < 5; i++)
                     {
@@ -719,12 +720,14 @@ public class Match3 : MonoBehaviour
     public class GemGridPosition {
         
         private GemGrid gemGrid;
-
+        private bool boosterCalled; // Control variable for avoiding stack overflow
         private Grid<GemGridPosition> grid;
         private int x;
         private int y;
 
-        public GemGridPosition(Grid<GemGridPosition> grid, int x, int y) {
+        public GemGridPosition(Grid<GemGridPosition> grid, int x, int y)
+        {
+            boosterCalled = false;
             this.grid = grid;
             this.x = x;
             this.y = y;
@@ -762,25 +765,38 @@ public class Match3 : MonoBehaviour
 
         public void FlyGem()
         {
-            instance.OnGemGridPositionFly?.Invoke(this, 
-                new OnNewGemGridPositionFlyEventArgs{x = x,y = (int)Match3Visual.instance.DESTROY_THRESHOLD + 1, gemType = GetGemGrid().GetGem()});
-            RemoveGem();
+            if (gemGrid.GetGem().type == GemSO.GemType.Standard)
+            {
+                instance.OnGemGridPositionFly?.Invoke(this, 
+                    new OnNewGemGridPositionFlyEventArgs{x = x,y = (int)Match3Visual.instance.DESTROY_THRESHOLD + 1, gemType = GetGemGrid().GetGem()});
+                RemoveGem();
+            }
+            else
+            {
+                if (!boosterCalled)
+                {
+                    boosterCalled = true;
+                    //gemGrid.GetGem().booster.UseBooster(x, y, this);
+                }
+                instance.OnGemGridPositionDestroyed?.Invoke(this, new OnGemGridPositionDestroyedEventArgs{intersect = false});
+            }
         }
 
-        public void FlyAndBoostGem()
+        public void CallBoosterOnSelf()
         {
-            gemGrid.GetGem().booster.UseBooster(x,y,this);
-            instance.OnGemGridPositionDestroyed?.Invoke(this, EventArgs.Empty);
+            Debug.Log("Used at x: " + x + " y: " + y);
+            gemGrid.GetGem().booster.UseBooster(x, y, this);
             RemoveGem();
+            
         }
 
         public void DestroyGem()
         {
-            instance.OnGemGridPositionDestroyed?.Invoke(this, EventArgs.Empty);
+            instance.OnGemGridPositionDestroyed?.Invoke(this, new OnGemGridPositionDestroyedEventArgs{intersect = true});
             RemoveGem();
         }
 
-        private void RemoveGem()
+        public void RemoveGem()
         {
             DestroyGemGrid();
             ClearGemGrid();
@@ -806,6 +822,7 @@ public class Match3 : MonoBehaviour
     public class GemGrid {
         
         private GemSO gem;
+        private Match3Visual.GemGridVisual visual = null;
         private int x;
         private int y;
         private bool isDestroyed;
@@ -821,6 +838,16 @@ public class Match3 : MonoBehaviour
             return gem;
         }
 
+        public void SetVisual(Match3Visual.GemGridVisual v)
+        {
+            visual = v;
+        }
+
+        public Match3Visual.GemGridVisual GetVisual()
+        {
+            return visual;
+        }
+        
         public Vector3 GetWorldPosition() {
             return new Vector3(x, y);
         }

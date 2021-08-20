@@ -16,7 +16,7 @@ public class TransmuteToRockets : Booster
         {
             for (int j = 0; j < yMax; j++)
             {
-                if (Match3.instance.GetGridAtXY(i,j).HasGemGrid() 
+                if (Match3.instance.GetGridAtXY(i,j) != null && Match3.instance.GetGridAtXY(i,j).HasGemGrid() 
                     && Match3.instance.GetGridAtXY(i,j).GetGemGrid().GetGem().color == caller.GetGemGrid().GetGem().color)
                 {
                     if (Random.Range(0,1) == 0)

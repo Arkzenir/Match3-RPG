@@ -12,9 +12,11 @@ public abstract class Booster : MonoBehaviour
 
     public virtual void UseBooster(int x, int y, Match3.GemGridPosition caller)
     {
+        Dictionary<Match3.GemGrid, Match3Visual.GemGridVisual> visual = Match3Visual.instance.GetDict();
+        
         if (caller.GetGemGrid().GetGem().type == GemSO.GemType.Standard)
             return;
-
+        
         Booster usedEffect = this;
         
         if (intersectionVector.Count == 0)
@@ -58,6 +60,7 @@ public abstract class Booster : MonoBehaviour
             usedEffect = intersectionVector[(int)nearbyGems[0].GetGemGrid().GetGem().type - 1];
             nearbyGems[0].DestroyGem();
         }
+        
         //There are more than 1 booster in radius, making a total of 3
         else if (nearbyGems.Count > 1)
         {
@@ -115,7 +118,7 @@ public abstract class Booster : MonoBehaviour
         usedEffect.BoosterEffect(x,y,caller);
 
         
-        //caller.DestroyGem();
+        //caller.RemoveGem();
         
     }
 }

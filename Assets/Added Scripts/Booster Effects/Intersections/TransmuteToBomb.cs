@@ -15,8 +15,8 @@ public class TransmuteToBomb : Booster
         {
             for (int j = 0; j < yMax; j++)
             {
-                if (Match3.instance.GetGridAtXY(i,j).HasGemGrid() 
-                && Match3.instance.GetGridAtXY(i,j).GetGemGrid().GetGem().color == caller.GetGemGrid().GetGem().color)
+                if (Match3.instance.GetGridAtXY(i,j) != null && Match3.instance.GetGridAtXY(i,j).HasGemGrid() 
+                        && Match3.instance.GetGridAtXY(i,j).GetGemGrid().GetGem().color == caller.GetGemGrid().GetGem().color)
                 {
                     b.BoosterEffect(i,j,caller);
                     

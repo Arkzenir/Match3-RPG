@@ -13,9 +13,9 @@ public class ClearGrid : Booster
         {
             for (int j = 0; j < yMax; j++)
             {
-                if (Match3.instance.GetGridAtXY(x+i,y+j).HasGemGrid())
+                if (Match3.instance.GetGridAtXY(i,j).HasGemGrid())
                 {
-                    Match3.instance.GetGridAtXY(x + i,y + j).FlyGem();
+                    Match3.instance.GetGridAtXY(i,j).FlyGem();
                 }
             }
         }

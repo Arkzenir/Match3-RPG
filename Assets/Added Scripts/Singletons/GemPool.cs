@@ -79,6 +79,7 @@ public class GemPool : MonoBehaviour
 
     public void PutInPool(GameObject obj, float delay)
     {
+        obj.transform.Find("defaultParticles").gameObject.SetActive(false);
         StartCoroutine(WaitDestroy(obj, delay));
     }
     

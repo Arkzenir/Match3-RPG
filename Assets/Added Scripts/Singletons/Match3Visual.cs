@@ -103,6 +103,7 @@ public class Match3Visual : MonoBehaviour
                 //gemGridVisualTransform.Find("sprite").GetComponent<SpriteRenderer>().sprite = gemGrid.GetGem().sprite;
 
                 GemGridVisual gemGridVisual = new GemGridVisual(gemGridVisualTransform, gemGrid);
+                gemGrid.SetVisual(gemGridVisual);
 
                 gemGridDictionary[gemGrid] = gemGridVisual;
                 gemGridVisual.MoveSequence(grid.GetWorldPosition(x,y),0.3f);
@@ -140,6 +141,7 @@ public class Match3Visual : MonoBehaviour
         var gemGridVisualTransform = GemPool.instance.SpawnFromPool(position, Quaternion.identity, e.gemGrid.GetGem()).transform;
         GemGridVisual gemGridVisual = new GemGridVisual(gemGridVisualTransform, e.gemGrid);
         gemGridDictionary[e.gemGrid] = gemGridVisual;
+        e.gemGrid.SetVisual(gemGridVisual);
 
         
         if (gemGridPosition != null)
@@ -147,7 +149,7 @@ public class Match3Visual : MonoBehaviour
             if (gemGridPosition.GetGemGrid().GetGem().type == GemSO.GemType.Standard)
                 gemGridVisual.MoveSequence(e.gemGridPosition.GetWorldPosition(), 0.3f);
             else
-                gemGridVisual.BoosterSpawnSequence(0f,0.3f);
+                gemGridVisual.BoosterSpawnSequence(0.3f,0.3f);
         }
         
         
@@ -159,19 +161,21 @@ public class Match3Visual : MonoBehaviour
         if (gemGridPosition != null && gemGridPosition.GetGemGrid() != null)
         {
             gemGridDictionary[gemGridPosition.GetGemGrid()].FlySequence(0.3f,0.3f,new Vector3(e.x,e.y));
-            //gemGridDictionary[gemGridPosition.GetGemGrid()].DestroyVisual(0f);
-            //gemGridDictionary.Remove(gemGridPosition.GetGemGrid());
         }
     }
 
-    private void Match3_OnGemGridPositionDestroyed(object sender, System.EventArgs e)
+    private void Match3_OnGemGridPositionDestroyed(object sender, Match3.OnGemGridPositionDestroyedEventArgs e)
     {
         Match3.GemGridPosition gemGridPosition = sender as Match3.GemGridPosition;
         if (gemGridPosition != null && gemGridPosition.GetGemGrid() != null)
         {
-            gemGridDictionary[gemGridPosition.GetGemGrid()].DestroyVisual(0f);
-            gemGridDictionary.Remove(gemGridPosition.GetGemGrid());
+            if (e.intersect)
+                gemGridDictionary[gemGridPosition.GetGemGrid()].BoosterIntersectSequence(0.2f);
+            else
+                gemGridDictionary[gemGridPosition.GetGemGrid()].BoosterUseSequence(0.3f, 0.3f, 0.2f);
         }
+
+        SetState(State.TryFindMatches);
     }
 
 
@@ -252,14 +256,12 @@ public class Match3Visual : MonoBehaviour
     {
         foreach (Match3.GemGrid gemGrid in gemGridDictionary.Keys)
         {
-            if (gemGrid != null) {
-                gemGridDictionary[gemGrid].Update();
-                if (gemGridDictionary[gemGrid].GetWorldPos().y >= DESTROY_THRESHOLD)
-                {
-                    gemGridDictionary[gemGrid].DestroyVisual(0.2f);
-                    gemGridDictionary.Remove(gemGrid);
-                    break;
-                }
+            if (gemGrid == null) continue;
+            if (gemGridDictionary[gemGrid].GetWorldPos().y >= DESTROY_THRESHOLD)
+            {
+                gemGridDictionary[gemGrid].DestroyVisual(0.2f);
+                gemGridDictionary.Remove(gemGrid);
+                break;
             }
         }
     }
@@ -327,16 +329,21 @@ public class Match3Visual : MonoBehaviour
         private Transform transform;
         private Match3.GemGrid gemGrid;
         private GameObject defaultParticles;
-        private GameObject boosterParticles;
+        private GameObject boosterSpawnParticles;
+        private GameObject boosterUseParticles;
+        private GameObject boosterIntersectParticles;
         private Sequence fly;
         private Sequence boosterSpawn;
+        private Sequence boosterUse;
 
         public GemGridVisual(Transform transform, Match3.GemGrid gemGrid)
         {
             this.transform = transform;
             this.gemGrid = gemGrid;
             defaultParticles = this.transform.Find("defaultParticles").gameObject;
-            boosterParticles = this.transform.Find("boosterParticles").gameObject;
+            boosterSpawnParticles = this.transform.Find("boosterSpawnParticles").gameObject;
+            boosterUseParticles = this.transform.Find("boosterUseParticles").gameObject;
+            boosterIntersectParticles = this.transform.Find("boosterIntersectParticles").gameObject;
         }
 
         public void DestroyVisual(float delay)
@@ -348,17 +355,41 @@ public class Match3Visual : MonoBehaviour
         {
             fly = DOTween.Sequence();
             defaultParticles.SetActive(true);
-            fly.Append(transform.DOMove(targetPos, flyDuration));
             fly.PrependInterval(delayBeforeFly);
+            fly.Append(transform.DOMove(targetPos, flyDuration));
+            
         }
 
         public void BoosterSpawnSequence(float delayBeforeSpawn, float scaleDuration)
         {
             boosterSpawn = DOTween.Sequence();
-            boosterParticles.SetActive(true);
+            boosterSpawnParticles.SetActive(true);
             boosterSpawn.PrependInterval(delayBeforeSpawn);
             transform.localScale = new Vector3(0.3f, 0.3f);
             boosterSpawn.Append(transform.DOScale(new Vector3(1f, 1f), scaleDuration));
+        }
+
+        public void BoosterUseSequence(float delayBeforeUse, float useDuration, float scaleDownDuration)
+        {
+            boosterUse = DOTween.Sequence();
+            boosterUseParticles.SetActive(true);
+            boosterUse.SetEase(Ease.InOutBack);
+            boosterUse.PrependInterval(delayBeforeUse);
+            boosterUse.Append(transform.DOScale(new Vector3(1.3f, 1.3f), useDuration));
+            
+            //Tweener final = transform.DOScale(new Vector3(0f, 0f), scaleDownDuration);
+            
+            Match3.GemGridPosition b =  Match3.instance.GetGridAtXY((int)gemGrid.GetWorldPosition().x, (int)gemGrid.GetWorldPosition().y);
+            //final.OnComplete(b.CallBoosterOnSelf);
+            
+            boosterUse.Append(transform.DOScale(new Vector3(0f, 0f), scaleDownDuration).OnComplete(b.CallBoosterOnSelf));
+            DestroyVisual(delayBeforeUse + useDuration + scaleDownDuration + 0.5f);
+        }
+
+        public void BoosterIntersectSequence(float delayBeforeDestroy)
+        {
+            boosterIntersectParticles.SetActive(true);
+            DestroyVisual(delayBeforeDestroy);
         }
 
         public void MoveSequence(Vector3 targetPos, float duration)
@@ -371,15 +402,6 @@ public class Match3Visual : MonoBehaviour
             return transform.position;
         }
 
-        public void Update()
-        {
-            /*
-            Vector3 targetPosition = gemGrid.GetWorldPosition();
-            Vector3 moveDir = (targetPosition - transform.position);
-            float moveSpeed = 10f;
-            
-            transform.position += moveDir * moveSpeed * Time.deltaTime;
-            */
-        }
+        
     }
 }
