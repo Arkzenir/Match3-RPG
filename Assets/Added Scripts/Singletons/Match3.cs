@@ -46,7 +46,6 @@ public class Match3 : MonoBehaviour
     
     [SerializeField] private LevelSO levelSO;
     [SerializeField] private bool autoLoadLevel;
-    [SerializeField] private bool match4Explosions; // Explode neighbour nodes on 4 match
 
     private int gridWidth;
     private int gridHeight;
@@ -54,7 +53,8 @@ public class Match3 : MonoBehaviour
     private Dictionary<GemGrid, Match3Visual.GemGridVisual> dict;
     private int score;
 
-    private List<GemGrid> toBeFlown = new List<GemGrid>();
+    private List<GemGridPosition> toBeFlown = new List<GemGridPosition>();
+    private Dictionary<GemGridPosition, int> boosterPos = new Dictionary<GemGridPosition, int>();
     private void Awake()
     {
         if (instance == null)
@@ -126,10 +126,11 @@ public class Match3 : MonoBehaviour
             {
                 foreach (GemGridPosition gemGridPosition in linkedGemGridPositionList)
                 {
-                    if (gemGridPosition != null) TryGemGridPositionFly(gemGridPosition);
+                    if (gemGridPosition != null) 
+                        TryGemGridPositionFly(gemGridPosition);
+                        //toBeFlown.Add(gemGridPosition);
                 }
                 foundMatch = true;
-                break;
             }
             
             //Booster in effect
@@ -187,8 +188,16 @@ public class Match3 : MonoBehaviour
                     float yTemp = toBeDestroyed[0].GetY();
                     foreach (GemGridPosition gemGridPosition in toBeDestroyed)
                     {
-                        if (gemGridPosition != null) TryGemGridPositionFly(gemGridPosition);
+                        if (gemGridPosition != null)
+                        {
+                            TryGemGridPositionFly(gemGridPosition);
+                            //toBeFlown.Add(gemGridPosition);
+                            Utils.AddToPosList(new Vector2(gemGridPosition.GetX(),gemGridPosition.GetY()));
+                            
+                        }
                     }
+                    
+                    Utils.ResetSwitchLists();
                     
                     //Choose random spot from last modified position list and spawn booster
                     if (Utils.GetLastPosList().Count > 0)
@@ -204,11 +213,11 @@ public class Match3 : MonoBehaviour
                             chosenPos =
                                 Utils.GetLastPosList()[UnityEngine.Random.Range(0, Utils.GetLastPosList().Count - 1)];
                         }
+                        
                         SpawnNewBoosterGem((int) chosenPos.x, (int) chosenPos.y, typeIndex, color);
                     }
 
                     foundMatch = true;
-                    break;
                 }
                 
                 /*
@@ -251,8 +260,18 @@ public class Match3 : MonoBehaviour
             
             
         }
-        
 
+        /*
+        foreach (var fGemGridPosition in toBeFlown)
+        {
+            if (fGemGridPosition != null && fGemGridPosition.HasGemGrid() && fGemGridPosition.GetGemGrid().GetGem().type == GemSO.GemType.Standard)
+            {
+                TryGemGridPositionFly(fGemGridPosition);
+            }
+        }
+
+        toBeFlown.Clear();
+        */
         OnScoreChanged?.Invoke(this, EventArgs.Empty);
         Utils.ResetSwitchLists();
         return foundMatch;
@@ -271,7 +290,7 @@ public class Match3 : MonoBehaviour
     {
         if (gemGridPosition.HasGemGrid())
         {
-            Utils.AddToPosList(new Vector2(gemGridPosition.GetX(),gemGridPosition.GetY()));
+            //Utils.AddToPosList(new Vector2(gemGridPosition.GetX(),gemGridPosition.GetY()));
             score += 10;
             gemGridPosition.FlyGem();
         }
@@ -283,7 +302,7 @@ public class Match3 : MonoBehaviour
         if (pos != null && pos.HasGemGrid())
         {
             score += 10;
-            Utils.AddToPosList(new Vector2(pos.GetX(), pos.GetY()));
+            //Utils.AddToPosList(new Vector2(pos.GetX(), pos.GetY()));
             pos.FlyGem();
         }
     }

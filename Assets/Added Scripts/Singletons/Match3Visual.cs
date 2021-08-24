@@ -269,6 +269,7 @@ public class Match3Visual : MonoBehaviour
     public void RemoveGridPosition(int x, int y)
     {
         match3.TryGemGridPositionFly(x, y);
+        Utils.AddToPosList(new Vector2(x,y));
         SetBusyState(0.2f, () => SetState(State.TryFindMatches));
     }
 
