@@ -43,6 +43,7 @@ public class Match3Visual : MonoBehaviour
     private float busyTimer;
     private int busyCount;
     public float DESTROY_THRESHOLD;
+    public static float MOVE_TIMER;
     private Action onBusyTimerElapsedAction;
 
     private int numOfMatched = 0;
@@ -117,6 +118,7 @@ public class Match3Visual : MonoBehaviour
         SetBusyState(.5f, () => SetState(State.TryFindMatches));
         busyCount = 0;
         DESTROY_THRESHOLD = EntityVisual.ENEMY_GRID_OFFSET + Match3.instance.GetGridHeight() + 1;
+        MOVE_TIMER = 0.15f;
         isSetup = true;
     }
 
@@ -217,7 +219,7 @@ public class Match3Visual : MonoBehaviour
             case State.TryFindMatches:
                 if (busyCount < grid.GetHeight())
                 {
-                    SetBusyState(0.1f, () => { match3.FallGemsIntoEmptyPositions(); });
+                    SetBusyState(MOVE_TIMER, () => { match3.FallGemsIntoEmptyPositions(); });
                     busyCount++;
                 }
                 else
@@ -336,6 +338,7 @@ public class Match3Visual : MonoBehaviour
         private Sequence fly;
         private Sequence boosterSpawn;
         private Sequence boosterUse;
+        private Sequence move;
 
         public GemGridVisual(Transform transform, Match3.GemGrid gemGrid)
         {
@@ -364,9 +367,11 @@ public class Match3Visual : MonoBehaviour
         public void BoosterSpawnSequence(float delayBeforeSpawn, float scaleDuration)
         {
             boosterSpawn = DOTween.Sequence();
-            boosterSpawnParticles.SetActive(true);
             boosterSpawn.PrependInterval(delayBeforeSpawn);
-            transform.localScale = new Vector3(0.3f, 0.3f);
+            transform.localScale = new Vector3(0f, 0f);
+            boosterSpawn.Append(transform.DOScale(0.3f, 0.001f))
+                .OnComplete(() => boosterSpawnParticles.SetActive(true));
+            
             boosterSpawn.Append(transform.DOScale(new Vector3(1f, 1f), scaleDuration));
         }
 
@@ -395,7 +400,10 @@ public class Match3Visual : MonoBehaviour
 
         public void MoveSequence(Vector3 targetPos, float duration)
         {
-            transform.DOMove(targetPos, duration);
+            move = DOTween.Sequence();
+            //This value is tied to the delay for gems falling into positions, and therefore must be adjusted through the const
+            move.PrependInterval(MOVE_TIMER * 2); 
+            move.Append(transform.DOMove(targetPos, duration));
         }
 
         public Vector3 GetWorldPos()
