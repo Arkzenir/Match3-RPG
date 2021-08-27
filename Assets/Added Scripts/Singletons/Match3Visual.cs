@@ -226,6 +226,10 @@ public class Match3Visual : MonoBehaviour
                 {
                     match3.SpawnNewMissingGridPositions();
                     busyCount = 0;
+                    if (busyCount != 0 && !match3.FallGemsIntoEmptyPositions())
+                    {
+                        SetBusyState(MOVE_TIMER / 2, () => { SetState(State.TryFindMatches);  });
+                    }
                     if (match3.TryFindMatchesAndDestroyThem())
                     {
                         numOfMatched++;
@@ -261,7 +265,7 @@ public class Match3Visual : MonoBehaviour
             if (gemGrid == null) continue;
             if (gemGridDictionary[gemGrid].GetWorldPos().y >= DESTROY_THRESHOLD)
             {
-                gemGridDictionary[gemGrid].DestroyVisual(0.2f);
+                gemGridDictionary[gemGrid].UpdateEntitiesAndDisappear(0.2f);
                 gemGridDictionary.Remove(gemGrid);
                 break;
             }
@@ -320,12 +324,25 @@ public class Match3Visual : MonoBehaviour
     {
         return gemGridDictionary;
     }
-
+    
     public State GetState()
     {
         return state;
     }
 
+    
+    private IEnumerator WaitSwitchState(State state, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SetState(state);
+    }
+
+    private IEnumerator Wait(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+    }
+    
+    
     public class GemGridVisual
     {
 
@@ -385,7 +402,7 @@ public class Match3Visual : MonoBehaviour
             
             //Tweener final = transform.DOScale(new Vector3(0f, 0f), scaleDownDuration);
             
-            Match3.GemGridPosition b =  Match3.instance.GetGridAtXY((int)gemGrid.GetWorldPosition().x, (int)gemGrid.GetWorldPosition().y);
+            Match3.GemGridPosition b =  Match3.instance.GetGridAtXY(gemGrid.GetGemX(), gemGrid.GetGemY());
             //final.OnComplete(b.CallBoosterOnSelf);
             
             boosterUse.Append(transform.DOScale(new Vector3(0f, 0f), scaleDownDuration).OnComplete(b.CallBoosterOnSelf));
@@ -406,6 +423,13 @@ public class Match3Visual : MonoBehaviour
             move.Append(transform.DOMove(targetPos, duration));
         }
 
+        public void UpdateEntitiesAndDisappear(float delay)
+        {
+            Enemies.instance.EnemyTakeDamage(gemGrid.GetGemX(),gemGrid.GetGem().damage);
+            Heroes.instance.ChargeHeroSkillFromGem(gemGrid.GetGem());
+            DestroyVisual(delay);
+        }
+        
         public Vector3 GetWorldPos()
         {
             return transform.position;

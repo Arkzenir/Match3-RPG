@@ -29,7 +29,7 @@ public class Enemies : MonoBehaviour
 
     void Start()
     {
-        Match3.instance.OnGemGridPositionFly += Match3_OnOnGemGridPositionFly;
+        //Match3.instance.OnGemGridPositionFly += Match3_OnOnGemGridPositionFly;
         Match3Visual.instance.OnStateChanged += Visual_OnOnStateChanged;
         
         ePosArr = new Enemy[Match3.instance.GetGridWidth()];
@@ -62,16 +62,17 @@ public class Enemies : MonoBehaviour
         }
     }
 
+    /*
     private void Match3_OnOnGemGridPositionFly(object sender, Match3.OnNewGemGridPositionFlyEventArgs e)
     {
         Match3.GemGridPosition gemGridPosition = sender as Match3.GemGridPosition;
         
         if (ePosArr[e.x] != null)
         {
-            enemyTakeDamage(e.x, e.gemType.damage);
+            EnemyTakeDamage(e.x, e.gemType.damage);
         }
     }
-    
+    */
 
     private bool SetUpArray()
     {
@@ -111,7 +112,7 @@ public class Enemies : MonoBehaviour
         return true;
     }
 
-    public void enemyTakeDamage(int pos, int dmg)
+    public void EnemyTakeDamage(int pos, int dmg)
     {
         if (ePosArr[pos] != null)
         {

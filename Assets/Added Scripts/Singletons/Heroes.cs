@@ -26,7 +26,7 @@ public class Heroes : MonoBehaviour
     void Start()
     {
         
-        Match3.instance.OnGemGridPositionFly += Match3_OnOnGemGridPositionFly;
+        //Match3.instance.OnGemGridPositionFly += Match3_OnOnGemGridPositionFly;
         enemies = Enemies.instance;
         visual = Match3Visual.instance;
         visual.OnStateChanged += Visual_OnOnStateChanged;
@@ -69,17 +69,33 @@ public class Heroes : MonoBehaviour
             }
         }
     }
-
+/*
     private void Match3_OnOnGemGridPositionFly(object sender, Match3.OnNewGemGridPositionFlyEventArgs e)
     {
         Match3.GemGridPosition gemGridPosition = sender as Match3.GemGridPosition;
-        GemSO gemType = gemGridPosition.GetGemGrid().GetGem(); 
-
-        foreach (var hero in heroes)
+        if (gemGridPosition != null)
         {
-            if (hero != null && hero.GetAssociatedGem() == gemType.color)
+            GemSO gemType = gemGridPosition.GetGemGrid().GetGem();
+            foreach (var hero in heroes)
             {
-                hero.ChargeSkill(1);
+                if (hero != null && hero.GetAssociatedGem() == gemType.color)
+                {
+                    hero.ChargeSkill(1);
+                }
+            }
+        }
+    }
+*/
+    public void ChargeHeroSkillFromGem(GemSO gem)
+    {
+        if (gem != null)
+        {
+            foreach (var hero in heroes)
+            {
+                if (hero != null && hero.GetAssociatedGem() == gem.color)
+                {
+                    hero.ChargeSkill(1);
+                }
             }
         }
     }

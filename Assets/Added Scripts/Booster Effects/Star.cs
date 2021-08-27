@@ -21,7 +21,6 @@ public class Star : Booster
                     || Mathf.Abs(i + j) == 2) continue;
                 if (Match3.instance.GetGridAtXY(x+i,y+j).HasGemGrid())
                 {
-                    Debug.Log("Exists at x: " + (x+i) + " y: " + (y+j) );
                     Match3.instance.GetGridAtXY(x + i,y + j).FlyGem();
                 }
             }

@@ -870,6 +870,16 @@ public class Match3 : MonoBehaviour
         public Vector3 GetWorldPosition() {
             return new Vector3(x, y);
         }
+
+        public int GetGemX()
+        {
+            return x;
+        }
+        
+        public int GetGemY()
+        {
+            return y;
+        }
         
         public void SetGemXY(int x, int y) {
             this.x = x;
