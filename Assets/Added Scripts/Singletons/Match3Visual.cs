@@ -207,7 +207,7 @@ public class Match3Visual : MonoBehaviour
 
                 break;
             case State.WaitingForUser:
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonDown(0) && state != State.GameOver)
                 {
                     Vector3 mouseWorldPosition = UtilsClass.GetMouseWorldPosition();
                     grid.GetXY(mouseWorldPosition, out touchX, out touchY);
@@ -217,6 +217,7 @@ public class Match3Visual : MonoBehaviour
 
                 break;
             case State.TryFindMatches:
+                //Move gems into places step by step
                 if (busyCount < grid.GetHeight())
                 {
                     SetBusyState(MOVE_TIMER, () => { match3.FallGemsIntoEmptyPositions(); });
@@ -226,6 +227,7 @@ public class Match3Visual : MonoBehaviour
                 {
                     match3.SpawnNewMissingGridPositions();
                     busyCount = 0;
+                    //Keep repeating until all gems in positions
                     if (busyCount != 0 && !match3.FallGemsIntoEmptyPositions())
                     {
                         SetBusyState(MOVE_TIMER / 2, () => { SetState(State.TryFindMatches);  });
@@ -297,10 +299,12 @@ public class Match3Visual : MonoBehaviour
         }
         else
         {
+            //You had a match, turn goes to the enemy
             if (currState == State.TryFindMatches && numOfMatched > 0)
             {
                 SetState(State.EnemyTurn);
             }
+            //No match after click, turn is yours
             else if ((currState == State.EnemyTurn || currState == State.TryFindMatches) && numOfMatched == 0)
             {
                 SetState(State.WaitingForUser);
@@ -314,10 +318,10 @@ public class Match3Visual : MonoBehaviour
         numOfMatched = 0;
     }
 
-    private void SetState(State state)
+    private void SetState(State s)
     {
-        this.state = state;
-        OnStateChanged?.Invoke(this, new OnStateChangedEventArgs {state = state});
+        state = s;
+        OnStateChanged?.Invoke(this, new OnStateChangedEventArgs {state = s});
     }
 
     public Dictionary<Match3.GemGrid, GemGridVisual> GetDict()
@@ -330,11 +334,11 @@ public class Match3Visual : MonoBehaviour
         return state;
     }
 
-    
-    private IEnumerator WaitSwitchState(State state, float delay)
+    //These are here for utility, for now they are unused
+    private IEnumerator WaitSwitchState(State s, float delay)
     {
         yield return new WaitForSeconds(delay);
-        SetState(state);
+        SetState(s);
     }
 
     private IEnumerator Wait(float delay)
@@ -399,12 +403,9 @@ public class Match3Visual : MonoBehaviour
             boosterUse.SetEase(Ease.InOutBack);
             boosterUse.PrependInterval(delayBeforeUse);
             boosterUse.Append(transform.DOScale(new Vector3(1.3f, 1.3f), useDuration));
-            
-            //Tweener final = transform.DOScale(new Vector3(0f, 0f), scaleDownDuration);
-            
+
             Match3.GemGridPosition b =  Match3.instance.GetGridAtXY(gemGrid.GetGemX(), gemGrid.GetGemY());
-            //final.OnComplete(b.CallBoosterOnSelf);
-            
+
             boosterUse.Append(transform.DOScale(new Vector3(0f, 0f), scaleDownDuration).OnComplete(b.CallBoosterOnSelf));
             DestroyVisual(delayBeforeUse + useDuration + scaleDownDuration + 0.5f);
         }

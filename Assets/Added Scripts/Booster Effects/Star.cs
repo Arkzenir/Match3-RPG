@@ -7,8 +7,6 @@ public class Star : Booster
 {
     public override void BoosterEffect(int x, int y, Match3.GemGridPosition caller)
     {
-        Debug.Log("Star used at x: " + x + " y: " + y );
-        
         int xMax = Match3.instance.GetGridWidth();
         int yMax = Match3.instance.GetGridHeight();
 

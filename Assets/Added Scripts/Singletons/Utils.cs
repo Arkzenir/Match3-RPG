@@ -340,36 +340,12 @@ public static class Utils
         */
         #endregion
         
-        exclusionList.Add(new int[5,5] 
-            {
-                {1,1,0,0,0},
-                {0,1,1,0,0},
-                {0,0,0,0,0},
-                {0,0,0,0,0},
-                {0,0,0,0,0}
-            }
-        );
-        
-        exclusionList.Add(new int[5,5] 
-            {
-                {1,0,0,0,0},
-                {1,1,0,0,0},
-                {0,1,0,0,0},
-                {0,0,0,0,0},
-                {0,0,0,0,0}
-            }
-        );
         
     }
     
     public static List<List<int[,]>> GetReferenceMatrixList()
     {
         return boosterReferenceList;
-    }
-
-    public static List<int[,]> GetExclusionList()
-    {
-        return exclusionList;
     }
 
     public static void RotateMatrixInPlace(int[,] inMatrix)

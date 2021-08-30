@@ -73,6 +73,7 @@ public class Match3 : MonoBehaviour
         return levelSO;
     }
 
+    //Setup function at the start
     public void SetLevelSO(LevelSO levelSO) {
         this.levelSO = levelSO;
 
@@ -260,37 +261,15 @@ public class Match3 : MonoBehaviour
             
             
         }
-
-        /*
-        foreach (var fGemGridPosition in toBeFlown)
-        {
-            if (fGemGridPosition != null && fGemGridPosition.HasGemGrid() && fGemGridPosition.GetGemGrid().GetGem().type == GemSO.GemType.Standard)
-            {
-                TryGemGridPositionFly(fGemGridPosition);
-            }
-        }
-
-        toBeFlown.Clear();
-        */
+        
         OnScoreChanged?.Invoke(this, EventArgs.Empty);
         Utils.ResetSwitchLists();
         return foundMatch;
     }
-
-    /*
-    public void TryDestroyGemGridPosition(GemGridPosition gemGridPosition) {
-        if (gemGridPosition.HasGemGrid()) {
-            gemGridPosition.DestroyGem();
-            OnGemGridPositionDestroyed?.Invoke(gemGridPosition, EventArgs.Empty);
-            gemGridPosition.ClearGemGrid();
-        }
-    }
-*/
     public void TryGemGridPositionFly(GemGridPosition gemGridPosition)
     {
         if (gemGridPosition.HasGemGrid())
         {
-            //Utils.AddToPosList(new Vector2(gemGridPosition.GetX(),gemGridPosition.GetY()));
             score += 10;
             gemGridPosition.FlyGem();
         }
@@ -302,11 +281,11 @@ public class Match3 : MonoBehaviour
         if (pos != null && pos.HasGemGrid())
         {
             score += 10;
-            //Utils.AddToPosList(new Vector2(pos.GetX(), pos.GetY()));
             pos.FlyGem();
         }
     }
 
+    //Spawn booster on location, this is supposed to take the last positions list from Utils class
     public void SpawnNewBoosterGem(int x,int y, int type, GemSO.GemColor color)
     {
         GemGridPosition gemGridPosition = grid.GetGridObject(x, y);
@@ -375,7 +354,7 @@ public class Match3 : MonoBehaviour
         }
         return finished;
     }
-
+    
     public bool HasMatch3Link(int x, int y) {
         GemGridPosition[,] linkedGemGridPositionList = GetMatch3Links(x, y);
 
@@ -401,12 +380,14 @@ public class Match3 : MonoBehaviour
         }
     }
 
+    //Draws the "shape" of a valid match starting from the given position
     public GemGridPosition[,] GetMatch3Links(int x, int y) {
         GemSO gemSO = GetGemSO(x, y);
 
-        //If we are going to add special interactions for matched boosters, change this
+        //If you are going to add special interactions for matched boosters, change this
         if (gemSO == null || gemSO.type != GemSO.GemType.Standard) return null; 
 
+        //It is mathematically impossible for a match to be longer than 5 units
         GemGridPosition[,] matchArray = new GemGridPosition[5, 5];
 
         int matchedGemCount = 0;
@@ -417,11 +398,12 @@ public class Match3 : MonoBehaviour
             {
                 if (IsValidPosition(x + i, y + j))
                 {
-                    GemSO nextGemSO = GetGemSO(x + i, y + j);
+                    GemSO nextGemSO = GetGemSO(x + i, y + j); //Gem is same as starting
                     if (nextGemSO == gemSO)
                     {
                         if (i != 0 || j != 0)
                         {
+                            //Check the next position to ensure that it is connected to the rest
                             bool cont = true;
                             foreach (var pos in matchArray)
                             {
@@ -442,6 +424,7 @@ public class Match3 : MonoBehaviour
             }
         }
 
+        //Check if match is a booster by comparing it to the reference matrices of booster shapes
         if (matchedGemCount > 3)
         {
             bool falseFlag = true;
@@ -462,19 +445,19 @@ public class Match3 : MonoBehaviour
                             }
                         }
                     }
-                        
+
 
                     for (int i = 0; i < 5; i++)
                     {
                         for (int j = 0; j < 5; j++)
                         {
-                            if (shapeMatrix[i,j] != matrix[i,j])
+                            if (shapeMatrix[i, j] != matrix[i, j])
                             {
                                 falseFlag = true;
                             }
                         }
                     }
-                        
+
                     if (!falseFlag)
                         break;
                 }
@@ -528,12 +511,10 @@ public class Match3 : MonoBehaviour
 
         if (horizontalLinkAmount == 3) {
             // Has 3 horizontal linked gems
-            //List<GemGridPosition> linkedGemGridPositionList = new List<GemGridPosition>();
             int leftMostX = x - leftLinkAmount;
             for (int i = 0; i < horizontalLinkAmount; i++)
             {
                 matchArray[0, i] = grid.GetGridObject(leftMostX + i, y);
-                //linkedGemGridPositionList.Add(grid.GetGridObject(leftMostX + i, y));
             }
             return matchArray;
         }
@@ -577,12 +558,10 @@ public class Match3 : MonoBehaviour
 
         if (verticalLinkAmount == 3) {
             // Has 3 vertical linked gems
-            //List<GemGridPosition> linkedGemGridPositionList = new List<GemGridPosition>();
             int downMostY = y - downLinkAmount;
             for (int i = 0; i < verticalLinkAmount; i++)
             {
                 matchArray[i, 0] = grid.GetGridObject(x, downMostY + i);
-                //linkedGemGridPositionList.Add(grid.GetGridObject(x, downMostY + i));
             }
             return matchArray;
         }
@@ -735,6 +714,7 @@ public class Match3 : MonoBehaviour
     /*
      * Represents a single Grid Position
      * Only the Grid Position which may or may not have an actual Gem on it
+     * Literally the square in the background, this is it
      * */
     public class GemGridPosition {
         
